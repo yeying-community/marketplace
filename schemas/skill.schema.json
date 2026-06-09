@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://yeying-community.github.io/skills/schemas/skill.schema.json",
+  "title": "Skill Package",
+  "type": "object",
+  "required": ["schemaVersion", "id", "version", "name", "launch", "instructions"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9.-]+)?$"
+    },
+    "name": {
+      "$ref": "#/$defs/localizedText"
+    },
+    "description": {
+      "$ref": "#/$defs/localizedText"
+    },
+    "author": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string" }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    },
+    "icon": {
+      "type": "object",
+      "properties": {
+        "type": { "enum": ["emoji", "builtin", "url"] },
+        "value": { "type": "string" }
+      },
+      "required": ["type", "value"],
+      "additionalProperties": false
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true
+    },
+    "category": {
+      "type": "string"
+    },
+    "visibility": {
+      "type": "object",
+      "properties": {
+        "scope": { "enum": ["private", "organization", "public"] },
+        "roles": { "type": "array", "items": { "type": "string" } },
+        "users": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["scope"],
+      "additionalProperties": false
+    },
+    "launch": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "chat" }
+          },
+          "required": ["type"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "workspace" },
+            "target": { "type": "string" }
+          },
+          "required": ["type", "target"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "external" },
+            "url": { "type": "string" }
+          },
+          "required": ["type", "url"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "instructions": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "inline" },
+            "content": { "type": "string", "minLength": 1 }
+          },
+          "required": ["type", "content"],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": { "const": "file" },
+            "path": { "type": "string", "minLength": 1 }
+          },
+          "required": ["type", "path"],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "starters": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "model": {
+      "type": "object",
+      "properties": {
+        "syncGlobalConfig": { "type": "boolean" },
+        "default": {
+          "type": "object",
+          "properties": {
+            "provider": { "type": "string" },
+            "model": { "type": "string" }
+          },
+          "additionalProperties": true
+        },
+        "candidates": { "type": "array" },
+        "params": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "required": { "type": "boolean" }
+        },
+        "required": ["id", "name", "required"],
+        "additionalProperties": false
+      }
+    },
+    "mcp": {
+      "type": "object",
+      "properties": {
+        "servers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "transport": { "enum": ["stdio", "http", "sse"] },
+              "required": { "type": "boolean" },
+              "configSchema": { "type": "object" }
+            },
+            "required": ["id", "name", "transport", "required"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ui": {
+      "type": "object",
+      "properties": {
+        "entryLabel": { "$ref": "#/$defs/localizedText" },
+        "emptyState": { "enum": ["minimal", "guided"] }
+      },
+      "additionalProperties": false
+    },
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "network": { "type": "boolean" },
+        "filesystem": { "type": "boolean" },
+        "wallet": { "type": "boolean" },
+        "externalTools": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "dataScopes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "required": ["network", "filesystem", "wallet", "externalTools"],
+      "additionalProperties": false
+    },
+    "compatibility": {
+      "type": "object",
+      "properties": {
+        "appVersion": { "type": "string" },
+        "mcp": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "release": {
+      "type": "object",
+      "properties": {
+        "status": { "enum": ["draft", "published", "deprecated", "removed"] },
+        "review": { "enum": ["pending", "approved", "rejected"] },
+        "changelog": { "type": "string" }
+      },
+      "required": ["status"],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizedText": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "cn": { "type": "string" },
+            "en": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
+

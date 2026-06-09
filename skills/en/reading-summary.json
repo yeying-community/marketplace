@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "id": "reading-summary",
+  "version": "1.0.0",
+  "name": {
+    "cn": "阅读总结",
+    "en": "Reading Summary"
+  },
+  "description": {
+    "cn": "将文章、网页或长文本提炼为结构化摘要和行动要点。",
+    "en": "Summarize articles, web pages, or long text into structured takeaways."
+  },
+  "author": {
+    "name": "community"
+  },
+  "icon": {
+    "type": "builtin",
+    "value": "gpt-bot"
+  },
+  "tags": ["reading", "summary", "web"],
+  "category": "productivity",
+  "visibility": {
+    "scope": "public"
+  },
+  "launch": {
+    "type": "chat"
+  },
+  "instructions": {
+    "type": "inline",
+    "content": "You are a reading assistant. Extract the main argument, key evidence, assumptions, risks, and practical next steps. Keep the output concise and structured."
+  },
+  "starters": [
+    "Summarize this article.",
+    "Extract the key ideas from this page.",
+    "Turn this long text into action items."
+  ],
+  "model": {
+    "syncGlobalConfig": true,
+    "candidates": []
+  },
+  "tools": [
+    {
+      "id": "web_search",
+      "name": "Web Search",
+      "description": "Use model-provider web search when available.",
+      "required": false
+    }
+  ],
+  "mcp": {
+    "servers": [
+      {
+        "id": "fetch",
+        "name": "Fetch",
+        "transport": "stdio",
+        "required": false
+      }
+    ]
+  },
+  "permissions": {
+    "network": true,
+    "filesystem": false,
+    "wallet": false,
+    "externalTools": ["web_search", "fetch"]
+  },
+  "compatibility": {
+    "appVersion": ">=0.1.0",
+    "mcp": "optional"
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}

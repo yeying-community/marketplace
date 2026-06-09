@@ -1,0 +1,66 @@
+[
+  {
+    "schemaVersion": "1.0",
+    "id": "brave-search",
+    "version": "1.0.0",
+    "name": "Brave Search",
+    "description": "Use Brave Search API for web search and current information retrieval.",
+    "repo": "https://github.com/brave/brave-search-mcp-server",
+    "tags": [
+      "official",
+      "search",
+      "web"
+    ],
+    "command": "npx",
+    "baseArgs": [
+      "-y",
+      "@brave/brave-search-mcp-server",
+      "--transport",
+      "stdio"
+    ],
+    "configurable": true,
+    "configSchema": {
+      "properties": {
+        "braveApiKey": {
+          "type": "string",
+          "description": "Brave Search API Key.",
+          "required": true,
+          "helpUrl": "https://api-dashboard.search.brave.com/login",
+          "helpLabel": "Get API Key"
+        }
+      }
+    },
+    "argsMapping": {
+      "braveApiKey": {
+        "type": "env",
+        "key": "BRAVE_API_KEY"
+      }
+    },
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "id": "fetch",
+    "version": "1.0.0",
+    "name": "Fetch",
+    "description": "Fetch and convert web content for reading, summarization, and research workflows.",
+    "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+    "tags": [
+      "official",
+      "web",
+      "http"
+    ],
+    "command": "uvx",
+    "baseArgs": [
+      "mcp-server-fetch"
+    ],
+    "configurable": false,
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  }
+]

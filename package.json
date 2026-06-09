@@ -1,0 +1,9 @@
+{
+  "name": "@yeying-community/marketplace",
+  "private": false,
+  "license": "MIT",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/build.mjs"
+  }
+}

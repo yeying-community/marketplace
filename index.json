@@ -1,0 +1,50 @@
+[
+  {
+    "id": "web-research",
+    "lang": "cn",
+    "version": "1.0.0",
+    "name": {
+      "cn": "网页调研",
+      "en": "Web Research"
+    },
+    "description": {
+      "cn": "围绕一个问题搜索资料、提炼来源、输出结构化结论。",
+      "en": "Search sources, extract evidence, and produce structured findings."
+    },
+    "category": "research",
+    "tags": [
+      "research",
+      "web",
+      "search"
+    ],
+    "path": "skills/cn/web-research.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "id": "reading-summary",
+    "lang": "en",
+    "version": "1.0.0",
+    "name": {
+      "cn": "阅读总结",
+      "en": "Reading Summary"
+    },
+    "description": {
+      "cn": "将文章、网页或长文本提炼为结构化摘要和行动要点。",
+      "en": "Summarize articles, web pages, or long text into structured takeaways."
+    },
+    "category": "productivity",
+    "tags": [
+      "reading",
+      "summary",
+      "web"
+    ],
+    "path": "skills/en/reading-summary.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  }
+]

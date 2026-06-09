@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "id": "fetch",
+  "version": "1.0.0",
+  "name": "Fetch",
+  "description": "Fetch and convert web content for reading, summarization, and research workflows.",
+  "repo": "https://github.com/modelcontextprotocol/servers/tree/main/src/fetch",
+  "tags": ["official", "web", "http"],
+  "command": "uvx",
+  "baseArgs": ["mcp-server-fetch"],
+  "configurable": false,
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}

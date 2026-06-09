@@ -1,0 +1,173 @@
+{
+  "cn": [
+    {
+      "schemaVersion": "1.0",
+      "id": "web-research",
+      "version": "1.0.0",
+      "name": {
+        "cn": "网页调研",
+        "en": "Web Research"
+      },
+      "description": {
+        "cn": "围绕一个问题搜索资料、提炼来源、输出结构化结论。",
+        "en": "Search sources, extract evidence, and produce structured findings."
+      },
+      "author": {
+        "name": "community"
+      },
+      "icon": {
+        "type": "builtin",
+        "value": "gpt-bot"
+      },
+      "tags": [
+        "research",
+        "web",
+        "search"
+      ],
+      "category": "research",
+      "visibility": {
+        "scope": "public"
+      },
+      "launch": {
+        "type": "chat"
+      },
+      "instructions": {
+        "type": "inline",
+        "content": "你是网页调研助手。优先围绕用户问题形成检索计划，综合多个来源，明确区分事实、推断和不确定点。输出结论时保留来源线索，避免堆砌无关背景。"
+      },
+      "starters": [
+        "调研这个主题的最新进展。",
+        "帮我比较这几个方案的优缺点。",
+        "查找这个问题的可靠来源并总结。"
+      ],
+      "model": {
+        "syncGlobalConfig": true,
+        "candidates": []
+      },
+      "tools": [
+        {
+          "id": "web_search",
+          "name": "Web Search",
+          "description": "Use model-provider web search when available.",
+          "required": false
+        }
+      ],
+      "mcp": {
+        "servers": [
+          {
+            "id": "fetch",
+            "name": "Fetch",
+            "transport": "stdio",
+            "required": false
+          },
+          {
+            "id": "brave-search",
+            "name": "Brave Search",
+            "transport": "stdio",
+            "required": false
+          }
+        ]
+      },
+      "permissions": {
+        "network": true,
+        "filesystem": false,
+        "wallet": false,
+        "externalTools": [
+          "web_search",
+          "fetch",
+          "brave-search"
+        ]
+      },
+      "compatibility": {
+        "appVersion": ">=0.1.0",
+        "mcp": "optional"
+      },
+      "release": {
+        "status": "published",
+        "review": "approved"
+      }
+    }
+  ],
+  "en": [
+    {
+      "schemaVersion": "1.0",
+      "id": "reading-summary",
+      "version": "1.0.0",
+      "name": {
+        "cn": "阅读总结",
+        "en": "Reading Summary"
+      },
+      "description": {
+        "cn": "将文章、网页或长文本提炼为结构化摘要和行动要点。",
+        "en": "Summarize articles, web pages, or long text into structured takeaways."
+      },
+      "author": {
+        "name": "community"
+      },
+      "icon": {
+        "type": "builtin",
+        "value": "gpt-bot"
+      },
+      "tags": [
+        "reading",
+        "summary",
+        "web"
+      ],
+      "category": "productivity",
+      "visibility": {
+        "scope": "public"
+      },
+      "launch": {
+        "type": "chat"
+      },
+      "instructions": {
+        "type": "inline",
+        "content": "You are a reading assistant. Extract the main argument, key evidence, assumptions, risks, and practical next steps. Keep the output concise and structured."
+      },
+      "starters": [
+        "Summarize this article.",
+        "Extract the key ideas from this page.",
+        "Turn this long text into action items."
+      ],
+      "model": {
+        "syncGlobalConfig": true,
+        "candidates": []
+      },
+      "tools": [
+        {
+          "id": "web_search",
+          "name": "Web Search",
+          "description": "Use model-provider web search when available.",
+          "required": false
+        }
+      ],
+      "mcp": {
+        "servers": [
+          {
+            "id": "fetch",
+            "name": "Fetch",
+            "transport": "stdio",
+            "required": false
+          }
+        ]
+      },
+      "permissions": {
+        "network": true,
+        "filesystem": false,
+        "wallet": false,
+        "externalTools": [
+          "web_search",
+          "fetch"
+        ]
+      },
+      "compatibility": {
+        "appVersion": ">=0.1.0",
+        "mcp": "optional"
+      },
+      "release": {
+        "status": "published",
+        "review": "approved"
+      }
+    }
+  ]
+}

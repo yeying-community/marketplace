@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "id": "example-skill",
+  "version": "1.0.0",
+  "name": {
+    "cn": "示例技能",
+    "en": "Example Skill"
+  },
+  "description": {
+    "cn": "把一个明确任务沉淀为可复用会话入口。",
+    "en": "Turn a clear task into a reusable chat entry."
+  },
+  "author": {
+    "name": "community"
+  },
+  "icon": {
+    "type": "builtin",
+    "value": "gpt-bot"
+  },
+  "tags": ["example"],
+  "category": "productivity",
+  "visibility": {
+    "scope": "public"
+  },
+  "launch": {
+    "type": "chat"
+  },
+  "instructions": {
+    "type": "inline",
+    "content": "You are a focused assistant for this task. Ask only when required, otherwise produce a concrete result."
+  },
+  "starters": ["Help me complete this task."],
+  "model": {
+    "syncGlobalConfig": true,
+    "candidates": []
+  },
+  "tools": [],
+  "mcp": {
+    "servers": []
+  },
+  "permissions": {
+    "network": false,
+    "filesystem": false,
+    "wallet": false,
+    "externalTools": []
+  },
+  "compatibility": {
+    "appVersion": ">=0.1.0"
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}
+

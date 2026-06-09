@@ -1,0 +1,34 @@
+[
+  {
+    "id": "brave-search",
+    "version": "1.0.0",
+    "name": "Brave Search",
+    "description": "Use Brave Search API for web search and current information retrieval.",
+    "tags": [
+      "official",
+      "search",
+      "web"
+    ],
+    "path": "mcp/servers/brave-search.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "id": "fetch",
+    "version": "1.0.0",
+    "name": "Fetch",
+    "description": "Fetch and convert web content for reading, summarization, and research workflows.",
+    "tags": [
+      "official",
+      "web",
+      "http"
+    ],
+    "path": "mcp/servers/fetch.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0",
+  "id": "example-mcp",
+  "version": "1.0.0",
+  "name": "Example MCP",
+  "description": "Describe what this MCP server enables and when users should install it.",
+  "repo": "https://github.com/example/example-mcp",
+  "tags": ["example"],
+  "command": "npx",
+  "baseArgs": ["-y", "@example/example-mcp"],
+  "configurable": false,
+  "release": {
+    "status": "draft",
+    "review": "pending"
+  }
+}

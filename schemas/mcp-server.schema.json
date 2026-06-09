@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/yeying-community/marketplace/main/schemas/mcp-server.schema.json",
+  "title": "Chat Marketplace MCP Server Package",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "id",
+    "version",
+    "name",
+    "description",
+    "repo",
+    "tags",
+    "command",
+    "baseArgs",
+    "configurable",
+    "release"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$"
+    },
+    "version": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "repo": {
+      "type": "string"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "command": {
+      "type": "string"
+    },
+    "baseArgs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "configurable": {
+      "type": "boolean"
+    },
+    "configSchema": {
+      "type": "object",
+      "properties": {
+        "properties": {
+          "type": "object"
+        }
+      }
+    },
+    "argsMapping": {
+      "type": "object"
+    },
+    "release": {
+      "type": "object",
+      "required": ["status", "review"],
+      "properties": {
+        "status": {
+          "enum": ["published", "draft", "removed"]
+        },
+        "review": {
+          "enum": ["approved", "pending", "rejected"]
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}
