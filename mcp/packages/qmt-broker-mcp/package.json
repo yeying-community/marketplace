@@ -1,0 +1,24 @@
+{
+  "name": "@yeying-community/qmt-broker-mcp",
+  "version": "0.1.0",
+  "description": "QMT broker MCP server for live A-share strategy trading through MiniQMT and xtquant.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "qmt-broker-mcp": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "check": "node --check src/index.js && python3 -m py_compile src/qmt_worker.py",
+    "start": "node src/index.js --transport stdio"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

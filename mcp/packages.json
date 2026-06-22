@@ -62,5 +62,243 @@
       "status": "published",
       "review": "approved"
     }
+  },
+  {
+    "schemaVersion": "1.0",
+    "id": "ifind-data",
+    "version": "0.1.0",
+    "name": "iFinD Data",
+    "description": "TongHuaShun iFinD / QuantAPI market data connector for strategy research, signals, and pre-trade checks.",
+    "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/ifind-data-mcp",
+    "tags": [
+      "community",
+      "market-data",
+      "ifind",
+      "quantapi",
+      "tonghuashun",
+      "trading"
+    ],
+    "command": "npx",
+    "baseArgs": [
+      "-y",
+      "@yeying-community/ifind-data-mcp",
+      "--transport",
+      "stdio"
+    ],
+    "configurable": true,
+    "configSchema": {
+      "properties": {
+        "refreshToken": {
+          "type": "string",
+          "description": "iFinD / QuantAPI refresh_token. Used to obtain access_token.",
+          "required": false,
+          "helpUrl": "https://quantapi.10jqka.com.cn/gwstatic/static/ds_web/super-command-web/index.html#/AccountDetails",
+          "helpLabel": "Get refresh_token"
+        },
+        "accessToken": {
+          "type": "string",
+          "description": "Optional existing access_token. If omitted, refreshToken is used.",
+          "required": false
+        },
+        "baseUrl": {
+          "type": "string",
+          "description": "QuantAPI HTTP base URL. Defaults to https://quantapi.51ifind.com/api/v1.",
+          "required": false
+        },
+        "requestTimeoutMs": {
+          "type": "string",
+          "description": "HTTP request timeout in milliseconds. Defaults to 30000.",
+          "required": false
+        }
+      }
+    },
+    "argsMapping": {
+      "refreshToken": {
+        "type": "env",
+        "key": "IFIND_REFRESH_TOKEN"
+      },
+      "accessToken": {
+        "type": "env",
+        "key": "IFIND_ACCESS_TOKEN"
+      },
+      "baseUrl": {
+        "type": "env",
+        "key": "IFIND_BASE_URL"
+      },
+      "requestTimeoutMs": {
+        "type": "env",
+        "key": "IFIND_REQUEST_TIMEOUT_MS"
+      }
+    },
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "id": "paper-broker",
+    "version": "0.1.0",
+    "name": "Paper Broker",
+    "description": "Simulated broker connector for dry-run order execution, portfolio checks, and strategy trading tests.",
+    "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/paper-broker-mcp",
+    "tags": [
+      "community",
+      "broker",
+      "trading",
+      "paper",
+      "simulation"
+    ],
+    "command": "npx",
+    "baseArgs": [
+      "-y",
+      "@yeying-community/paper-broker-mcp",
+      "--transport",
+      "stdio"
+    ],
+    "configurable": true,
+    "configSchema": {
+      "properties": {
+        "initialCash": {
+          "type": "string",
+          "description": "Initial paper trading cash balance, for example 100000.",
+          "required": false
+        },
+        "market": {
+          "type": "string",
+          "description": "Default market scope, for example CN-A, HK, US, or CRYPTO.",
+          "required": false
+        },
+        "currency": {
+          "type": "string",
+          "description": "Paper trading account currency, for example USD, CNY, or HKD.",
+          "required": false
+        },
+        "allowShort": {
+          "type": "boolean",
+          "description": "Whether simulated sell orders can open short positions. Disabled by default.",
+          "required": false
+        },
+        "requireConfirmation": {
+          "type": "boolean",
+          "description": "Whether place_order requires confirmed=true after explicit user confirmation. Enabled by default.",
+          "required": false
+        }
+      }
+    },
+    "argsMapping": {
+      "initialCash": {
+        "type": "env",
+        "key": "PAPER_BROKER_INITIAL_CASH"
+      },
+      "market": {
+        "type": "env",
+        "key": "PAPER_BROKER_MARKET"
+      },
+      "currency": {
+        "type": "env",
+        "key": "PAPER_BROKER_CURRENCY"
+      },
+      "allowShort": {
+        "type": "env",
+        "key": "PAPER_BROKER_ALLOW_SHORT"
+      },
+      "requireConfirmation": {
+        "type": "env",
+        "key": "PAPER_BROKER_REQUIRE_CONFIRMATION"
+      }
+    },
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "schemaVersion": "1.0",
+    "id": "qmt-broker",
+    "version": "0.1.0",
+    "name": "QMT Broker",
+    "description": "Live broker connector for A-share strategy trading through local MiniQMT and xtquant.",
+    "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/qmt-broker-mcp",
+    "tags": [
+      "community",
+      "broker",
+      "trading",
+      "qmt",
+      "live-trading",
+      "a-share"
+    ],
+    "command": "npx",
+    "baseArgs": [
+      "-y",
+      "@yeying-community/qmt-broker-mcp",
+      "--transport",
+      "stdio"
+    ],
+    "configurable": true,
+    "configSchema": {
+      "properties": {
+        "qmtUserdataPath": {
+          "type": "string",
+          "description": "MiniQMT userdata_mini path, for example D:\\QMT\\userdata_mini.",
+          "required": true
+        },
+        "accountId": {
+          "type": "string",
+          "description": "Broker fund account id.",
+          "required": true
+        },
+        "accountType": {
+          "type": "string",
+          "description": "QMT account type, usually STOCK or CREDIT.",
+          "required": false
+        },
+        "pythonCommand": {
+          "type": "string",
+          "description": "Python command with xtquant installed, for example python or python3.",
+          "required": false
+        },
+        "enableLiveTrading": {
+          "type": "boolean",
+          "description": "Enable real order submission. Keep disabled until account, risk controls, and confirmation flow are verified.",
+          "required": true
+        },
+        "requireConfirmation": {
+          "type": "boolean",
+          "description": "Require confirmed=true for place_order. Enabled by default.",
+          "required": false
+        }
+      }
+    },
+    "argsMapping": {
+      "qmtUserdataPath": {
+        "type": "env",
+        "key": "QMT_USERDATA_PATH"
+      },
+      "accountId": {
+        "type": "env",
+        "key": "QMT_ACCOUNT_ID"
+      },
+      "accountType": {
+        "type": "env",
+        "key": "QMT_ACCOUNT_TYPE"
+      },
+      "pythonCommand": {
+        "type": "env",
+        "key": "QMT_PYTHON"
+      },
+      "enableLiveTrading": {
+        "type": "env",
+        "key": "QMT_ENABLE_LIVE_TRADING"
+      },
+      "requireConfirmation": {
+        "type": "env",
+        "key": "QMT_REQUIRE_CONFIRMATION"
+      }
+    },
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
   }
 ]

@@ -16,10 +16,12 @@ https://raw.githubusercontent.com/yeying-community/marketplace/main/packages.jso
 python3 -m http.server 3090
 ```
 
-然后使用：
+然后在 Chat 本地开发时覆盖市场地址：
 
-```txt
-http://localhost:3090/packages.json
+```bash
+MARKETPLACE_SKILL_PACKAGES_URL=http://localhost:3090/packages.json \
+MARKETPLACE_MCP_PACKAGES_URL=http://localhost:3090/mcp/packages.json \
+npm run dev
 ```
 
 不建议在文档中使用本地绝对路径。开发者应该从社区仓库 clone 后，在自己的本地目录启动服务。

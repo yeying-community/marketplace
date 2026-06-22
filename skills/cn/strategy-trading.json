@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "1.0",
+  "id": "strategy-trading",
+  "version": "1.0.0",
+  "name": {
+    "cn": "策略交易",
+    "en": "Strategy Trading"
+  },
+  "description": {
+    "cn": "把交易想法转成可执行策略、风险约束和下单计划；连接真实券商 MCP 后可进行受控实盘执行。",
+    "en": "Turn a trading idea into an executable strategy, risk policy, and order plan; connect a live broker MCP for controlled production execution."
+  },
+  "author": {
+    "name": "community"
+  },
+  "icon": {
+    "type": "emoji",
+    "value": "1f4c8"
+  },
+  "tags": ["trading", "strategy", "execution", "risk", "automation"],
+  "category": "finance",
+  "visibility": {
+    "scope": "public"
+  },
+  "launch": {
+    "type": "chat"
+  },
+  "instructions": {
+    "type": "inline",
+    "content": "你是策略交易助手。目标是把用户的交易想法转成可执行策略、风险约束和下单计划，并在真实券商 MCP 可用时进行受控实盘执行。先收集市场、标的、周期、资金规模、最大回撤、仓位上限、止损/止盈规则、数据源、券商连接器和执行模式。优先使用 ifind-data 获取同花顺 iFinD / QuantAPI 行情、基本面、公告和选股数据；使用 qmt-broker 执行 A 股/ETF/可转债实盘交易；paper-broker 只能作为测试/演练工具。输出固定为：策略摘要、入场/退出规则、仓位与风控、订单计划、执行前检查、需要的数据和券商连接器。没有真实券商连接器时，只生成待执行计划或模拟演练，不要伪造实盘下单结果。只有在用户明确确认实盘、真实券商连接器可用且风控检查通过时，才允许调用真实下单工具。信息不足时，只追问最关键的一项。"
+  },
+  "starters": [
+    "把这套交易想法整理成可执行策略。",
+    "基于这个标的和风险预算，生成实盘前检查清单。",
+    "把这个策略拆成入场、止损、止盈和 QMT 下单步骤。"
+  ],
+  "model": {
+    "syncGlobalConfig": false,
+    "params": {
+      "temperature": 0.2,
+      "max_tokens": 6000,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "sendMemory": true,
+      "historyMessageCount": 12,
+      "compressMessageLengthThreshold": 2500
+    }
+  },
+  "tools": [],
+  "mcp": {
+    "servers": [
+      {
+        "id": "ifind-data",
+        "name": "iFinD Data",
+        "transport": "stdio",
+        "required": true
+      },
+      {
+        "id": "qmt-broker",
+        "name": "QMT Broker",
+        "transport": "stdio",
+        "required": false
+      },
+      {
+        "id": "paper-broker",
+        "name": "Paper Broker",
+        "transport": "stdio",
+        "required": false
+      }
+    ]
+  },
+  "ui": {
+    "entryLabel": {
+      "cn": "策略交易",
+      "en": "Strategy Trading"
+    },
+    "emptyState": "guided"
+  },
+  "permissions": {
+    "network": true,
+    "filesystem": false,
+    "wallet": false,
+    "externalTools": ["ifind-data", "qmt-broker", "paper-broker"],
+    "dataScopes": ["market-data", "portfolio", "orders"]
+  },
+  "compatibility": {
+    "appVersion": ">=0.1.0",
+    "mcp": "optional"
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}

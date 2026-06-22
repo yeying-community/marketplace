@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "id": "paper-broker",
+  "version": "0.1.0",
+  "name": "Paper Broker",
+  "description": "Simulated broker connector for dry-run order execution, portfolio checks, and strategy trading tests.",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/paper-broker-mcp",
+  "tags": ["community", "broker", "trading", "paper", "simulation"],
+  "command": "npx",
+  "baseArgs": ["-y", "@yeying-community/paper-broker-mcp", "--transport", "stdio"],
+  "configurable": true,
+  "configSchema": {
+    "properties": {
+      "initialCash": {
+        "type": "string",
+        "description": "Initial paper trading cash balance, for example 100000.",
+        "required": false
+      },
+      "market": {
+        "type": "string",
+        "description": "Default market scope, for example CN-A, HK, US, or CRYPTO.",
+        "required": false
+      },
+      "currency": {
+        "type": "string",
+        "description": "Paper trading account currency, for example USD, CNY, or HKD.",
+        "required": false
+      },
+      "allowShort": {
+        "type": "boolean",
+        "description": "Whether simulated sell orders can open short positions. Disabled by default.",
+        "required": false
+      },
+      "requireConfirmation": {
+        "type": "boolean",
+        "description": "Whether place_order requires confirmed=true after explicit user confirmation. Enabled by default.",
+        "required": false
+      }
+    }
+  },
+  "argsMapping": {
+    "initialCash": {
+      "type": "env",
+      "key": "PAPER_BROKER_INITIAL_CASH"
+    },
+    "market": {
+      "type": "env",
+      "key": "PAPER_BROKER_MARKET"
+    },
+    "currency": {
+      "type": "env",
+      "key": "PAPER_BROKER_CURRENCY"
+    },
+    "allowShort": {
+      "type": "env",
+      "key": "PAPER_BROKER_ALLOW_SHORT"
+    },
+    "requireConfirmation": {
+      "type": "env",
+      "key": "PAPER_BROKER_REQUIRE_CONFIRMATION"
+    }
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}

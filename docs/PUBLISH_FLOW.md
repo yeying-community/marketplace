@@ -144,6 +144,27 @@ https://raw.githubusercontent.com/yeying-community/marketplace/main/mcp/packages
 
 如果技能依赖 Chat 新能力，需要先升级 Chat，再发布技能。
 
+MCP 源码包如果通过 `npx -y @yeying-community/<name>` 启动，还需要发布 npm 包。当前仓库提供 GitHub Actions：
+
+```txt
+.github/workflows/publish-mcp-packages.yml
+```
+
+发布方式和 `web3-bs` 一致，使用仓库 secret：
+
+```txt
+npm_token
+```
+
+维护者可以在 GitHub Actions 手动触发 `Publish MCP Packages`，选择：
+
+- `all`
+- `ifind-data-mcp`
+- `qmt-broker-mcp`
+- `paper-broker-mcp`
+
+创建 GitHub Release 时也会触发该 workflow。workflow 会先运行 marketplace 校验、子包校验和 `npm pack --dry-run`，再发布 npm 上尚不存在的同版本包；如果某个包的同版本已经发布，会自动跳过。
+
 
 ## 6. 用户怎么配置
 

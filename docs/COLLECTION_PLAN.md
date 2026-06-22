@@ -28,6 +28,7 @@ Start with:
 - design
 - image
 - operations
+- finance
 - community
 
 ## Quality Bar

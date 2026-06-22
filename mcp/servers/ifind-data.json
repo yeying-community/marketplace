@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "id": "ifind-data",
+  "version": "0.1.0",
+  "name": "iFinD Data",
+  "description": "TongHuaShun iFinD / QuantAPI market data connector for strategy research, signals, and pre-trade checks.",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/ifind-data-mcp",
+  "tags": ["community", "market-data", "ifind", "quantapi", "tonghuashun", "trading"],
+  "command": "npx",
+  "baseArgs": ["-y", "@yeying-community/ifind-data-mcp", "--transport", "stdio"],
+  "configurable": true,
+  "configSchema": {
+    "properties": {
+      "refreshToken": {
+        "type": "string",
+        "description": "iFinD / QuantAPI refresh_token. Used to obtain access_token.",
+        "required": false,
+        "helpUrl": "https://quantapi.10jqka.com.cn/gwstatic/static/ds_web/super-command-web/index.html#/AccountDetails",
+        "helpLabel": "Get refresh_token"
+      },
+      "accessToken": {
+        "type": "string",
+        "description": "Optional existing access_token. If omitted, refreshToken is used.",
+        "required": false
+      },
+      "baseUrl": {
+        "type": "string",
+        "description": "QuantAPI HTTP base URL. Defaults to https://quantapi.51ifind.com/api/v1.",
+        "required": false
+      },
+      "requestTimeoutMs": {
+        "type": "string",
+        "description": "HTTP request timeout in milliseconds. Defaults to 30000.",
+        "required": false
+      }
+    }
+  },
+  "argsMapping": {
+    "refreshToken": {
+      "type": "env",
+      "key": "IFIND_REFRESH_TOKEN"
+    },
+    "accessToken": {
+      "type": "env",
+      "key": "IFIND_ACCESS_TOKEN"
+    },
+    "baseUrl": {
+      "type": "env",
+      "key": "IFIND_BASE_URL"
+    },
+    "requestTimeoutMs": {
+      "type": "env",
+      "key": "IFIND_REQUEST_TIMEOUT_MS"
+    }
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}

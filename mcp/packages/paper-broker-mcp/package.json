@@ -1,0 +1,24 @@
+{
+  "name": "@yeying-community/paper-broker-mcp",
+  "version": "0.1.0",
+  "description": "Paper broker MCP server for strategy trading dry-run and simulated order execution.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "paper-broker-mcp": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "check": "node --check src/index.js",
+    "start": "node src/index.js --transport stdio"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

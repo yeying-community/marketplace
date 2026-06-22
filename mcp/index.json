@@ -30,5 +30,61 @@
       "status": "published",
       "review": "approved"
     }
+  },
+  {
+    "id": "ifind-data",
+    "version": "0.1.0",
+    "name": "iFinD Data",
+    "description": "TongHuaShun iFinD / QuantAPI market data connector for strategy research, signals, and pre-trade checks.",
+    "tags": [
+      "community",
+      "market-data",
+      "ifind",
+      "quantapi",
+      "tonghuashun",
+      "trading"
+    ],
+    "path": "mcp/servers/ifind-data.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "id": "paper-broker",
+    "version": "0.1.0",
+    "name": "Paper Broker",
+    "description": "Simulated broker connector for dry-run order execution, portfolio checks, and strategy trading tests.",
+    "tags": [
+      "community",
+      "broker",
+      "trading",
+      "paper",
+      "simulation"
+    ],
+    "path": "mcp/servers/paper-broker.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
+  },
+  {
+    "id": "qmt-broker",
+    "version": "0.1.0",
+    "name": "QMT Broker",
+    "description": "Live broker connector for A-share strategy trading through local MiniQMT and xtquant.",
+    "tags": [
+      "community",
+      "broker",
+      "trading",
+      "qmt",
+      "live-trading",
+      "a-share"
+    ],
+    "path": "mcp/servers/qmt-broker.json",
+    "release": {
+      "status": "published",
+      "review": "approved"
+    }
   }
 ]

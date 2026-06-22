@@ -1,0 +1,104 @@
+name: Publish MCP Packages
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "MCP package to publish"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - ifind-data-mcp
+          - qmt-broker-mcp
+          - paper-broker-mcp
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: npm run check
+      - name: Check selected MCP packages
+        env:
+          SELECTED_PACKAGE: ${{ github.event.inputs.package || 'all' }}
+        run: |
+          set -euo pipefail
+
+          packages=(
+            "ifind-data-mcp"
+            "qmt-broker-mcp"
+            "paper-broker-mcp"
+          )
+
+          for package in "${packages[@]}"; do
+            if [ "$SELECTED_PACKAGE" != "all" ] && [ "$SELECTED_PACKAGE" != "$package" ]; then
+              continue
+            fi
+
+            echo "Checking $package"
+            cd "mcp/packages/$package"
+            npm install --no-package-lock --ignore-scripts
+            npm run check
+            npm pack --dry-run
+            cd ../../..
+          done
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org/
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify npm publish identity
+        run: npm whoami --registry=https://registry.npmjs.org/
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+      - name: Publish selected MCP packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.npm_token }}
+          SELECTED_PACKAGE: ${{ github.event.inputs.package || 'all' }}
+        run: |
+          set -euo pipefail
+
+          packages=(
+            "ifind-data-mcp"
+            "qmt-broker-mcp"
+            "paper-broker-mcp"
+          )
+
+          for package in "${packages[@]}"; do
+            if [ "$SELECTED_PACKAGE" != "all" ] && [ "$SELECTED_PACKAGE" != "$package" ]; then
+              continue
+            fi
+
+            cd "mcp/packages/$package"
+            name=$(node -p "require('./package.json').name")
+            version=$(node -p "require('./package.json').version")
+
+            if npm view "$name@$version" version --registry=https://registry.npmjs.org/ >/dev/null 2>&1; then
+              echo "$name@$version already exists, skip publish"
+              cd ../../..
+              continue
+            fi
+
+            npm install --no-package-lock --ignore-scripts
+            npm run check
+            npm publish --access public
+            cd ../../..
+          done

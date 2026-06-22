@@ -27,6 +27,7 @@
 - MCP：外部工具运行时或连接器
 - Model Provider：模型服务商接入说明和能力声明
 - Tool Adapter：由 OpenAPI 或其他协议适配出来的工具包
+- Finance / Trading：策略交易、模拟执行和券商连接器
 
 ## 仓库结构
 
@@ -93,6 +94,8 @@ Chat 应用当前加载 MCP 服务器包地址：
 ```txt
 https://raw.githubusercontent.com/yeying-community/marketplace/main/mcp/packages.json
 ```
+
+社区维护的 MCP 源码包位于 `mcp/packages/`。如果 MCP 声明通过 `npx -y @yeying-community/<package>` 启动，需要通过 GitHub Actions 发布到 npm。仓库 secret 使用 `npm_token`，workflow 是 `Publish MCP Packages`。
 
 ## Chat 集成
 

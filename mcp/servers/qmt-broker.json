@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "id": "qmt-broker",
+  "version": "0.1.0",
+  "name": "QMT Broker",
+  "description": "Live broker connector for A-share strategy trading through local MiniQMT and xtquant.",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/qmt-broker-mcp",
+  "tags": ["community", "broker", "trading", "qmt", "live-trading", "a-share"],
+  "command": "npx",
+  "baseArgs": ["-y", "@yeying-community/qmt-broker-mcp", "--transport", "stdio"],
+  "configurable": true,
+  "configSchema": {
+    "properties": {
+      "qmtUserdataPath": {
+        "type": "string",
+        "description": "MiniQMT userdata_mini path, for example D:\\QMT\\userdata_mini.",
+        "required": true
+      },
+      "accountId": {
+        "type": "string",
+        "description": "Broker fund account id.",
+        "required": true
+      },
+      "accountType": {
+        "type": "string",
+        "description": "QMT account type, usually STOCK or CREDIT.",
+        "required": false
+      },
+      "pythonCommand": {
+        "type": "string",
+        "description": "Python command with xtquant installed, for example python or python3.",
+        "required": false
+      },
+      "enableLiveTrading": {
+        "type": "boolean",
+        "description": "Enable real order submission. Keep disabled until account, risk controls, and confirmation flow are verified.",
+        "required": true
+      },
+      "requireConfirmation": {
+        "type": "boolean",
+        "description": "Require confirmed=true for place_order. Enabled by default.",
+        "required": false
+      }
+    }
+  },
+  "argsMapping": {
+    "qmtUserdataPath": {
+      "type": "env",
+      "key": "QMT_USERDATA_PATH"
+    },
+    "accountId": {
+      "type": "env",
+      "key": "QMT_ACCOUNT_ID"
+    },
+    "accountType": {
+      "type": "env",
+      "key": "QMT_ACCOUNT_TYPE"
+    },
+    "pythonCommand": {
+      "type": "env",
+      "key": "QMT_PYTHON"
+    },
+    "enableLiveTrading": {
+      "type": "env",
+      "key": "QMT_ENABLE_LIVE_TRADING"
+    },
+    "requireConfirmation": {
+      "type": "env",
+      "key": "QMT_REQUIRE_CONFIRMATION"
+    }
+  },
+  "release": {
+    "status": "published",
+    "review": "approved"
+  }
+}
