@@ -1,4 +1,4 @@
-# Broker MCP 契约
+# Broker Tool 契约
 
 本文定义策略交易 skill 需要的 broker connector 最小能力。生产目标是接入真实券商；模拟券商只用于开发验证和演练，不应被包装成生产实盘能力。
 

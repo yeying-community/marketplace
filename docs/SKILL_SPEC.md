@@ -12,7 +12,7 @@
 - `instructions`: prompt or instruction source
 - `model`: model preferences and candidate restrictions
 - `tools`: built-in tool declarations
-- `mcp`: MCP service requirements
+- `toolServers`: Tool Server requirements
 - `permissions`: declared capability surface
 - `release`: publication status
 
@@ -24,9 +24,9 @@ Supported built-in tool ids:
 
 - `web_search`
 
-MCP services are declared in `mcp.servers`.
+External tool runtime requirements are declared in `toolServers`. Tool Server is the marketplace and product-level name. A Tool Server can internally use MCP or another protocol, but skill authors should not use protocol names as manifest fields.
 
-Examples:
+Example:
 
 ```json
 {
@@ -44,19 +44,17 @@ Examples:
       "required": false
     }
   ],
-  "mcp": {
-    "servers": [
-      {
-        "id": "fetch",
-        "name": {
-          "cn": "网页抓取",
-          "en": "Fetch"
-        },
-        "transport": "stdio",
-        "required": false
-      }
-    ]
-  }
+  "toolServers": [
+    {
+      "id": "fetch",
+      "name": {
+        "cn": "网页抓取",
+        "en": "Fetch"
+      },
+      "transport": "stdio",
+      "required": false
+    }
+  ]
 }
 ```
 
@@ -66,8 +64,8 @@ Examples:
 - Dependencies must be explicit.
 - API keys, tokens, private URLs, and local file paths are forbidden.
 - Unsafe system instructions are forbidden.
-- If a skill requires MCP, mark the MCP server as `required: true`.
-- If a skill only benefits from MCP, mark it as `required: false`.
+- If a skill requires a Tool Server, mark it as `required: true`.
+- If a skill only benefits from a Tool Server, mark it as `required: false`.
 
 ## Discovery Status
 

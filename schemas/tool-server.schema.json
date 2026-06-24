@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://raw.githubusercontent.com/yeying-community/marketplace/main/schemas/mcp-server.schema.json",
-  "title": "Chat Marketplace MCP Server Package",
+  "$id": "https://raw.githubusercontent.com/yeying-community/marketplace/main/schemas/tool-server.schema.json",
+  "title": "Chat Marketplace Tool Server Package",
   "type": "object",
   "required": [
     "schemaVersion",

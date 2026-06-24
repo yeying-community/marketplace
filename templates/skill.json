@@ -35,9 +35,7 @@
     "candidates": []
   },
   "tools": [],
-  "mcp": {
-    "servers": []
-  },
+  "toolServers": [],
   "permissions": {
     "network": false,
     "filesystem": false,
@@ -52,4 +50,3 @@
     "review": "approved"
   }
 }
-

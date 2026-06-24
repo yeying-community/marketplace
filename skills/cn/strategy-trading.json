@@ -7,8 +7,8 @@
     "en": "Strategy Trading"
   },
   "description": {
-    "cn": "把交易想法转成可执行策略、风险约束和下单计划；连接真实券商 MCP 后可进行受控实盘执行。",
-    "en": "Turn a trading idea into an executable strategy, risk policy, and order plan; connect a live broker MCP for controlled production execution."
+    "cn": "把交易想法转成可执行策略、风险约束和下单计划；连接真实券商工具后可进行受控实盘执行。",
+    "en": "Turn a trading idea into an executable strategy, risk policy, and order plan; connect a live broker tool for controlled production execution."
   },
   "author": {
     "name": "community"
@@ -27,7 +27,7 @@
   },
   "instructions": {
     "type": "inline",
-    "content": "你是策略交易助手。目标是把用户的交易想法转成可执行策略、风险约束和下单计划，并在真实券商 MCP 可用时进行受控实盘执行。先收集市场、标的、周期、资金规模、最大回撤、仓位上限、止损/止盈规则、数据源、券商连接器和执行模式。优先使用 ifind-data 获取同花顺 iFinD / QuantAPI 行情、基本面、公告和选股数据；使用 qmt-broker 执行 A 股/ETF/可转债实盘交易；paper-broker 只能作为测试/演练工具。输出固定为：策略摘要、入场/退出规则、仓位与风控、订单计划、执行前检查、需要的数据和券商连接器。没有真实券商连接器时，只生成待执行计划或模拟演练，不要伪造实盘下单结果。只有在用户明确确认实盘、真实券商连接器可用且风控检查通过时，才允许调用真实下单工具。信息不足时，只追问最关键的一项。"
+    "content": "你是策略交易助手。目标是把用户的交易想法转成可执行策略、风险约束和下单计划，并在真实券商工具可用时进行受控实盘执行。先收集市场、标的、周期、资金规模、最大回撤、仓位上限、止损/止盈规则、数据源、券商连接器和执行模式。优先使用 ifind-data 获取同花顺 iFinD / QuantAPI 行情、基本面、公告和选股数据；使用 qmt-broker 执行 A 股/ETF/可转债实盘交易；paper-broker 只能作为测试/演练工具。输出固定为：策略摘要、入场/退出规则、仓位与风控、订单计划、执行前检查、需要的数据和券商连接器。没有真实券商连接器时，只生成待执行计划或模拟演练，不要伪造实盘下单结果。只有在用户明确确认实盘、真实券商连接器可用且风控检查通过时，才允许调用真实下单工具。信息不足时，只追问最关键的一项。"
   },
   "starters": [
     "把这套交易想法整理成可执行策略。",
@@ -47,37 +47,35 @@
     }
   },
   "tools": [],
-  "mcp": {
-    "servers": [
-      {
-        "id": "ifind-data",
-        "name": {
-          "cn": "同花顺 iFinD 数据",
-          "en": "iFinD Data"
-        },
-        "transport": "stdio",
-        "required": true
+  "toolServers": [
+    {
+      "id": "ifind-data",
+      "name": {
+        "cn": "同花顺 iFinD 数据",
+        "en": "iFinD Data"
       },
-      {
-        "id": "qmt-broker",
-        "name": {
-          "cn": "QMT 实盘券商",
-          "en": "QMT Broker"
-        },
-        "transport": "stdio",
-        "required": false
+      "transport": "stdio",
+      "required": true
+    },
+    {
+      "id": "qmt-broker",
+      "name": {
+        "cn": "QMT 实盘券商",
+        "en": "QMT Broker"
       },
-      {
-        "id": "paper-broker",
-        "name": {
-          "cn": "模拟券商",
-          "en": "Paper Broker"
-        },
-        "transport": "stdio",
-        "required": false
-      }
-    ]
-  },
+      "transport": "stdio",
+      "required": false
+    },
+    {
+      "id": "paper-broker",
+      "name": {
+        "cn": "模拟券商",
+        "en": "Paper Broker"
+      },
+      "transport": "stdio",
+      "required": false
+    }
+  ],
   "ui": {
     "entryLabel": {
       "cn": "策略交易",
@@ -94,7 +92,7 @@
   },
   "compatibility": {
     "appVersion": ">=0.1.0",
-    "mcp": "optional"
+    "toolRuntime": "optional"
   },
   "release": {
     "status": "published",

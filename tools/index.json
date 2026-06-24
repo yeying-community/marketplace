@@ -15,7 +15,7 @@
       "search",
       "web"
     ],
-    "path": "mcp/servers/brave-search.json",
+    "path": "tools/servers/brave-search.json",
     "release": {
       "status": "published",
       "review": "approved"
@@ -37,7 +37,7 @@
       "web",
       "http"
     ],
-    "path": "mcp/servers/fetch.json",
+    "path": "tools/servers/fetch.json",
     "release": {
       "status": "published",
       "review": "approved"
@@ -62,7 +62,7 @@
       "tonghuashun",
       "trading"
     ],
-    "path": "mcp/servers/ifind-data.json",
+    "path": "tools/servers/ifind-data.json",
     "release": {
       "status": "published",
       "review": "approved"
@@ -86,7 +86,7 @@
       "paper",
       "simulation"
     ],
-    "path": "mcp/servers/paper-broker.json",
+    "path": "tools/servers/paper-broker.json",
     "release": {
       "status": "published",
       "review": "approved"
@@ -111,7 +111,7 @@
       "live-trading",
       "a-share"
     ],
-    "path": "mcp/servers/qmt-broker.json",
+    "path": "tools/servers/qmt-broker.json",
     "release": {
       "status": "published",
       "review": "approved"

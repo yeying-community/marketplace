@@ -52,19 +52,17 @@
       "required": false
     }
   ],
-  "mcp": {
-    "servers": [
-      {
-        "id": "fetch",
-        "name": {
-          "cn": "网页抓取",
-          "en": "Fetch"
-        },
-        "transport": "stdio",
-        "required": false
-      }
-    ]
-  },
+  "toolServers": [
+    {
+      "id": "fetch",
+      "name": {
+        "cn": "网页抓取",
+        "en": "Fetch"
+      },
+      "transport": "stdio",
+      "required": false
+    }
+  ],
   "permissions": {
     "network": true,
     "filesystem": false,
@@ -73,7 +71,7 @@
   },
   "compatibility": {
     "appVersion": ">=0.1.0",
-    "mcp": "optional"
+    "toolRuntime": "optional"
   },
   "release": {
     "status": "published",

@@ -10,7 +10,7 @@
     "cn": "通过本地 MiniQMT 和 xtquant 连接 A 股实盘券商，用于策略交易执行。",
     "en": "Live broker connector for A-share strategy trading through local MiniQMT and xtquant."
   },
-  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/qmt-broker-mcp",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/tools/packages/qmt-broker-mcp",
   "tags": ["community", "broker", "trading", "qmt", "live-trading", "a-share"],
   "command": "npx",
   "baseArgs": ["-y", "@yeying-community/qmt-broker-mcp", "--transport", "stdio"],

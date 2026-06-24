@@ -10,7 +10,7 @@
     "cn": "模拟券商连接器，用于订单演练、组合检查和策略交易测试。",
     "en": "Simulated broker connector for dry-run order execution, portfolio checks, and strategy trading tests."
   },
-  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/paper-broker-mcp",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/tools/packages/paper-broker-mcp",
   "tags": ["community", "broker", "trading", "paper", "simulation"],
   "command": "npx",
   "baseArgs": ["-y", "@yeying-community/paper-broker-mcp", "--transport", "stdio"],

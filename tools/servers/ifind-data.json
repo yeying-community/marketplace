@@ -10,7 +10,7 @@
     "cn": "同花顺 iFinD / QuantAPI 行情数据连接器，用于策略调研、信号生成和交易前检查。",
     "en": "TongHuaShun iFinD / QuantAPI market data connector for strategy research, signals, and pre-trade checks."
   },
-  "repo": "https://github.com/yeying-community/marketplace/tree/main/mcp/packages/ifind-data-mcp",
+  "repo": "https://github.com/yeying-community/marketplace/tree/main/tools/packages/ifind-data-mcp",
   "tags": ["community", "market-data", "ifind", "quantapi", "tonghuashun", "trading"],
   "command": "npx",
   "baseArgs": ["-y", "@yeying-community/ifind-data-mcp", "--transport", "stdio"],
