@@ -146,26 +146,20 @@
         "additionalProperties": false
       }
     },
-    "mcp": {
-      "type": "object",
-      "properties": {
-        "servers": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": { "type": "string" },
-              "name": { "$ref": "#/$defs/localizedText" },
-              "transport": { "enum": ["stdio", "http", "sse"] },
-              "required": { "type": "boolean" },
-              "configSchema": { "type": "object" }
-            },
-            "required": ["id", "name", "transport", "required"],
-            "additionalProperties": false
-          }
-        }
-      },
-      "additionalProperties": false
+    "toolServers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "$ref": "#/$defs/localizedText" },
+          "transport": { "enum": ["stdio", "http", "sse"] },
+          "required": { "type": "boolean" },
+          "configSchema": { "type": "object" }
+        },
+        "required": ["id", "name", "transport", "required"],
+        "additionalProperties": false
+      }
     },
     "ui": {
       "type": "object",
@@ -197,7 +191,7 @@
       "type": "object",
       "properties": {
         "appVersion": { "type": "string" },
-        "mcp": { "type": "string" }
+        "toolRuntime": { "type": "string" }
       },
       "additionalProperties": false
     },

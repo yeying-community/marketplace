@@ -3,7 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const skillsDir = path.join(root, "skills");
-const mcpServersDir = path.join(root, "mcp", "servers");
+const toolServersDir = path.join(root, "tools", "servers");
 const languages = ["cn", "en"];
 
 function readJson(file) {
@@ -42,7 +42,7 @@ function validateSkill(skill, file) {
   assert(skill.release?.status !== "removed", `${file}: removed skills should not be committed`);
 }
 
-function validateMcpServer(server, file) {
+function validateToolServer(server, file) {
   assert(server.schemaVersion === "1.0", `${file}: schemaVersion must be 1.0`);
   assert(
     typeof server.id === "string" && /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(server.id),
@@ -59,7 +59,7 @@ function validateMcpServer(server, file) {
   assert(typeof server.command === "string" && server.command, `${file}: command is required`);
   assert(Array.isArray(server.baseArgs), `${file}: baseArgs must be an array`);
   assert(typeof server.configurable === "boolean", `${file}: configurable must be a boolean`);
-  assert(server.release?.status !== "removed", `${file}: removed MCP servers should not be committed`);
+  assert(server.release?.status !== "removed", `${file}: removed tool servers should not be committed`);
 }
 
 function collectSkills() {
@@ -108,27 +108,27 @@ function collectSkills() {
   };
 }
 
-function collectMcpServers() {
+function collectToolServers() {
   const servers = [];
   const index = [];
   const seen = new Set();
 
-  if (!fs.existsSync(mcpServersDir)) {
+  if (!fs.existsSync(toolServersDir)) {
     return { servers, index };
   }
 
   const files = fs
-    .readdirSync(mcpServersDir)
+    .readdirSync(toolServersDir)
     .filter((file) => file.endsWith(".json"))
     .sort();
 
   for (const file of files) {
-    const absolute = path.join(mcpServersDir, file);
+    const absolute = path.join(toolServersDir, file);
     const relative = path.relative(root, absolute);
     const server = readJson(absolute);
-    validateMcpServer(server, relative);
+    validateToolServer(server, relative);
 
-    assert(!seen.has(server.id), `${relative}: duplicate MCP server id ${server.id}`);
+    assert(!seen.has(server.id), `${relative}: duplicate tool server id ${server.id}`);
     seen.add(server.id);
 
     servers.push(server);
@@ -147,12 +147,12 @@ function collectMcpServers() {
 }
 
 const { skillIndex, grouped } = collectSkills();
-const { servers: mcpServers, index: mcpIndex } = collectMcpServers();
+const { servers: toolServers, index: toolIndex } = collectToolServers();
 
 writeJson(path.join(root, "index.json"), skillIndex);
 writeJson(path.join(root, "packages.json"), grouped);
-writeJson(path.join(root, "mcp", "index.json"), mcpIndex);
-writeJson(path.join(root, "mcp", "packages.json"), mcpServers);
+writeJson(path.join(root, "tools", "index.json"), toolIndex);
+writeJson(path.join(root, "tools", "packages.json"), toolServers);
 
 console.log(`Built ${skillIndex.length} skill packages`);
-console.log(`Built ${mcpIndex.length} MCP packages`);
+console.log(`Built ${toolIndex.length} tool packages`);

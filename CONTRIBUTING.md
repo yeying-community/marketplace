@@ -28,7 +28,7 @@ When collecting skills from open source projects:
 1. Verify the license permits reuse.
 2. Keep attribution in `author`.
 3. Rewrite vague prompts into task-focused instructions.
-4. Declare required built-in tools and MCP services explicitly.
+4. Declare required built-in tools and Tool Server services explicitly.
 5. Remove secrets, private URLs, and local file paths.
 6. Add at least two practical starters.
 7. Run `npm run check`.
@@ -41,7 +41,7 @@ When collecting skills from open source projects:
 - Required tools are explicit.
 - Optional tools are marked `required: false`.
 - No secrets or private data are included.
-- The skill can still work when optional MCP is not configured.
+- The skill can still work when optional Tool Server dependencies are not configured.
 
 ## Build Skill Package List
 
@@ -55,5 +55,7 @@ This generates:
 
 - `index.json`
 - `packages.json`
+- `tools/index.json`
+- `tools/packages.json`
 
-The chat app should consume `packages.json`.
+The chat app should consume `packages.json` and `tools/packages.json`.

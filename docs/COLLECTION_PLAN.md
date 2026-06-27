@@ -2,7 +2,7 @@
 
 This repository should become the public marketplace source for chat.
 
-The product scope covers skills, MCP packages, model providers, and tool adapters.
+The product scope covers skills, tool packages, model providers, and storage capabilities.
 
 ## Sources
 
@@ -11,7 +11,7 @@ Collect from:
 - official examples from this organization
 - community pull requests
 - high-quality open source prompt libraries with compatible licenses
-- task workflows from MCP server examples
+- task workflows from Tool Server examples
 - product, research, writing, coding, design, and operations templates
 
 Do not bulk-import low-quality prompt dumps. Every skill should be rewritten into the current skill package spec.
@@ -39,7 +39,7 @@ A skill should answer:
 - What inputs does it expect?
 - What output should it produce?
 - Which model capability does it need?
-- Which built-in tools or MCP services does it use?
+- Which built-in tools or Tool Server services does it use?
 - Can the user run it immediately after install?
 
 ## Chat Discovery Integration
@@ -60,7 +60,7 @@ Remote marketplace skill actions:
 
 - `Install`: write package into local skill store
 - `Manage`: open installed skill
-- `Configure`: open missing MCP/model dependency
+- `Configure`: open missing tool/model dependency
 
 ## Release Process
 

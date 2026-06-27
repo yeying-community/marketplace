@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "1.0",
+  "id": "example-tool",
+  "version": "1.0.0",
+  "name": {
+    "cn": "示例工具",
+    "en": "Example Tool"
+  },
+  "description": {
+    "cn": "描述这个工具提供什么能力，以及用户什么时候应该安装它。",
+    "en": "Describe what this tool server enables and when users should install it."
+  },
+  "repo": "https://github.com/example/example-tool",
+  "tags": ["example"],
+  "command": "npx",
+  "baseArgs": ["-y", "@example/example-tool"],
+  "configurable": false,
+  "release": {
+    "status": "draft",
+    "review": "pending"
+  }
+}
