@@ -45,8 +45,11 @@ The server treats the token as its owner's signed authentication method and reus
 | `file-link` | `GET /api/file/link` | 用户范围；生成/刷新分享链接 |
 | `file-remove` | `GET /api/file/remove` | 用户范围；`ids` 为数组 |
 | `file-move` | `GET /api/file/move` | 用户范围；`ids` 为数组 |
+| execution archive upload | `POST /api/dialog/msg/sendfile` | 任务对话附件；`dialog_id` 必须是目标任务的对话 ID |
 
 File cabinet endpoints require the Project token `file_cabinet` permission scope. File cabinet authorization is then userid-scoped: the token can access files owned by the token user, files created by the token user, and files shared to the token user. Requests without a specific `id` parameter (listing, searching, root-level creation) are authorized by the scope gate first and then by the controller layer through `User::auth()` and `File::permissionFind`.
+
+任务执行归档使用目标任务的 `dialog_id` 调用 `dialog/msg/sendfile`。Project 会把任务对话中的非图片文件登记到任务附件，随后可通过 `project/task/files`、`project/task/filedown` 读取和校验。该路径与用户文件柜是不同的授权边界。
 
 Chunked upload endpoints under `/api/upload/*` are only authorized for `scene=file_cabinet` sessions when called with AK/SK. The `file_cabinet` scope does not authorize `image`, `generic_file`, or `dialog_file` upload scenes.
 
