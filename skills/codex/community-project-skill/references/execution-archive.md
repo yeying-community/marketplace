@@ -1,6 +1,6 @@
 # 任务执行过程归档
 
-`community-project-skill` 可以把一次由 Codex、Claude 或其他 Agent 完成的任务执行过程保存到指定 Project 任务。这个能力只理解 Project 任务，不要求 Warehouse，也不要求某一种客户端。
+`community-project-skill` 可以把一次由 Codex、Claude 或其他 Agent 完成的任务执行过程保存到指定 Project 任务，并和研发生命周期、验证、commit、PR 结果关联。这个能力只理解 Project 任务，不要求 Warehouse，也不要求某一种客户端。
 
 ## 生命周期
 
@@ -9,7 +9,8 @@
 ```bash
 python3 scripts/project_execution_archive.py start \
   --project-id 8 --task-id 123 --source-tool codex --model gpt-5 \
-  --state /tmp/execution.json --output-dir /tmp/execution
+  --state /tmp/execution.json --output-dir /tmp/execution \
+  --lifecycle-file /path/to/repository/.project-lifecycle.json
 
 python3 scripts/project_execution_archive.py append \
   --state /tmp/execution.json --role user --content "用户请求"
@@ -37,7 +38,7 @@ transcript.json
 manifest.json
 ```
 
-`manifest.json` 记录 `projectId`、`taskId`、`executionId`、来源工具、模型、起止时间、记录数量、完整性、缺失项、脱敏标记以及 transcript 文件的 SHA-256。Manifest 不记录自己的 SHA-256，因为文件不能包含自身最终内容的哈希。
+`manifest.json` 记录 `projectId`、`taskId`、`executionId`、来源工具、模型、起止时间、记录数量、完整性、缺失项、脱敏标记、生命周期阶段和 transcript 文件的 SHA-256。若提供生命周期快照，还会记录其摘要哈希；快照中的仓库、commit、PR、验证结果会进入结构化 transcript。Manifest 不记录自己的 SHA-256，因为文件不能包含自身最终内容的哈希。
 
 当宿主环境无法提供隐藏上下文、完整工具结果或附件时，必须使用 `--incomplete --missing "..."`，不能把可见记录宣称为平台底层的完整审计日志。
 

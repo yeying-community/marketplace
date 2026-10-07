@@ -7,7 +7,7 @@
 `skills/codex/` 保存面向 Codex 的执行类技能，用于沉淀社区项目中的重复工程方法，例如：
 
 - Warehouse、Router、Knowledge、Project 等单产品 Tool 化、MCP 接入和 Agent 化；
-- Project 任务协作和文件柜同步；
+- Project 研发任务全生命周期管理、AI 执行归档和文件柜同步；
 - 后续可复用的部署、发布、审计或迁移流程。
 
 这类技能不是 Chat Marketplace 的用户技能包，不使用 `skills/chat/<skill-id>/<lang>.json` 格式，也不会被当前 `scripts/build.mjs` 写入 `packages.json`。
@@ -66,7 +66,7 @@ community-<scope>-skill
 
 | Skill | 用途 |
 | --- | --- |
-| `community-project-skill` | 通过 Project 标准 API 读取任务、更新评论、同步文件柜文档 |
+| `community-project-skill` | 通过 Project 标准 API 管理研发任务生命周期、归档 AI 执行并同步文件柜文档 |
 | `community-warehouse-skill` | 按统一契约推进 Warehouse Tool 化、MCP 接入和 Agent 编排 |
 
 ## 维护规则

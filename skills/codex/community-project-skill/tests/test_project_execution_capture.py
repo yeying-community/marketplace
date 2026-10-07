@@ -23,9 +23,12 @@ class ExecutionCaptureTest(unittest.TestCase):
                 encoding="utf-8",
             )
             state_path = root / "state.json"
+            lifecycle_path = root / "lifecycle.json"
+            lifecycle_path.write_text(json.dumps({"project_id": 8, "task_id": 123, "stage": "implementation"}), encoding="utf-8")
             result = capture.capture(capture.parser().parse_args([
                 "--project-id", "8", "--task-id", "123", "--source-tool", "claude",
                 "--state", str(state_path), "--output-dir", str(root / "archive"),
+                "--lifecycle-file", str(lifecycle_path),
                 "--input-file", str(events), "--incomplete", "--missing", "hidden context",
             ]))
             self.assertEqual(result["records"], 2)
@@ -33,6 +36,7 @@ class ExecutionCaptureTest(unittest.TestCase):
             self.assertEqual(state["event_ids"], ["1", "2"])
             transcript = (root / "archive" / "transcript.json").read_text(encoding="utf-8")
             self.assertIn("[REDACTED]", transcript)
+            self.assertIn('"stage": "implementation"', transcript)
 
 
 if __name__ == "__main__":

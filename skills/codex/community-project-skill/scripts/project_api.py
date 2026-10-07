@@ -8,7 +8,6 @@ import datetime as dt
 import hashlib
 import hmac
 import json
-import os
 import re
 import secrets
 import sys
@@ -18,8 +17,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
-
-DEFAULT_CONFIG = Path.home() / ".config" / "yeying" / "project.json"
+from project_config import ConfigError, load as load_project_config
 
 
 class ProjectApiError(RuntimeError):
@@ -95,27 +93,16 @@ def markdown_to_task_html(content: str) -> str:
     return "".join(blocks)
 
 
-def load_config() -> dict[str, str]:
-    config_path = Path(os.environ.get("YEYING_PROJECT_CONFIG", DEFAULT_CONFIG)).expanduser()
-    config: dict[str, Any] = {}
-    if config_path.exists():
-        try:
-            config = json.loads(config_path.read_text(encoding="utf-8"))
-        except (OSError, json.JSONDecodeError) as exc:
-            raise ProjectApiError(f"无法读取配置 {config_path}: {exc}") from exc
-
-    resolved = {
-        "url": os.environ.get("YEYING_PROJECT_URL") or config.get("url", ""),
-        "access_key": os.environ.get("YEYING_PROJECT_AK") or config.get("access_key", ""),
-        "secret_key": os.environ.get("YEYING_PROJECT_SK") or config.get("secret_key", ""),
+def load_config(explicit_path: str | Path | None = None) -> dict[str, str]:
+    try:
+        settings = load_project_config(explicit_path)
+    except ConfigError as exc:
+        raise ProjectApiError(str(exc)) from exc
+    return {
+        "url": settings.base_url,
+        "access_key": settings.access_key,
+        "secret_key": settings.secret_key,
     }
-    missing = [key for key, value in resolved.items() if not value]
-    if missing:
-        raise ProjectApiError(
-            f"缺少配置: {', '.join(missing)}。请设置环境变量或创建 {config_path}"
-        )
-    resolved["url"] = resolved["url"].rstrip("/")
-    return resolved
 
 
 def canonical_query(params: dict[str, Any]) -> str:
@@ -252,6 +239,7 @@ def request_upload(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="YeYing Project 自动化协作客户端")
+    parser.add_argument("--config", help="TOML 配置文件，默认 ~/.yeying/skills/project/config.toml")
     subparsers = parser.add_subparsers(dest="command", required=True)
     subparsers.add_parser("projects", help="列出令牌可访问项目")
 
@@ -260,6 +248,19 @@ def build_parser() -> argparse.ArgumentParser:
     tasks.add_argument("--keyword")
     tasks.add_argument("--page", type=int, default=1)
     tasks.add_argument("--pagesize", type=int, default=50)
+
+    task_create = subparsers.add_parser("task-create", help="创建项目任务")
+    task_create.add_argument("--project-id", type=int, required=True)
+    task_create.add_argument("--name", required=True)
+    task_create.add_argument("--column-id", help="列表 ID 或名称；留空使用项目第一个列表")
+    task_create_content = task_create.add_mutually_exclusive_group()
+    task_create_content.add_argument("--content", help="Markdown 格式的任务详情")
+    task_create_content.add_argument("--content-file", type=Path, help="包含任务详情的 UTF-8 文件")
+    task_create.add_argument("--content-format", choices=("markdown", "html"), default="markdown")
+    task_create.add_argument("--owner", type=int, help="负责人用户 ID")
+    task_create.add_argument("--times", help="JSON 数组或对象")
+    task_create.add_argument("--subtasks", help="JSON 子任务数组")
+    task_create.add_argument("--top", action="store_true", help="将任务排到列表最前面")
 
     task = subparsers.add_parser("task", help="读取任务详情和最近讨论")
     task.add_argument("--task-id", type=int, required=True)
@@ -354,7 +355,7 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     try:
-        config = load_config()
+        config = load_config(args.config)
         if args.command == "projects":
             data = request_api(config, "GET", "/api/project/lists", {"getstatistics": "no"})
         elif args.command == "tasks":
@@ -362,6 +363,27 @@ def main() -> int:
             if args.keyword:
                 params["name"] = args.keyword
             data = request_api(config, "GET", "/api/project/task/lists", params)
+        elif args.command == "task-create":
+            params: dict[str, Any] = {"project_id": args.project_id, "name": args.name}
+            if args.column_id:
+                params["column_id"] = args.column_id
+            content = args.content
+            if args.content_file:
+                content = args.content_file.read_text(encoding="utf-8")
+            if content is not None:
+                params["content"] = content if args.content_format == "html" else markdown_to_task_html(content)
+            if args.owner is not None:
+                params["owner"] = args.owner
+            if args.top:
+                params["top"] = 1
+            for key in ("times", "subtasks"):
+                value = getattr(args, key)
+                if value is not None:
+                    try:
+                        params[key] = json.loads(value)
+                    except json.JSONDecodeError as exc:
+                        raise ProjectApiError(f"--{key} 必须是有效 JSON") from exc
+            data = request_api(config, "POST", "/api/project/task/add", params)
         elif args.command == "task":
             task = request_api(config, "GET", "/api/project/task/one", {"task_id": args.task_id})
             content = request_api(config, "GET", "/api/project/task/content", {"task_id": args.task_id})

@@ -57,6 +57,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="同步本地文档到 Project 文件柜")
     parser.add_argument("mode", choices=("check", "plan", "apply"))
     parser.add_argument("--config", type=Path, required=True, help="同步清单 JSON")
+    parser.add_argument("--project-config", help="Project TOML 配置文件")
     parser.add_argument("--state", type=Path, help="同步状态 JSON")
     args = parser.parse_args()
     try:
@@ -64,7 +65,7 @@ def main() -> int:
         root = int(manifest.get("project_root_id", 0))
         state_path = args.state or args.config.with_suffix(".state.json")
         state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
-        api = load_config() if args.mode in ("plan", "apply") else None
+        api = load_config(args.project_config) if args.mode in ("plan", "apply") else None
         results: list[dict[str, Any]] = []
         for spec in manifest["files"]:
             source = Path(spec["source"]).expanduser().resolve()

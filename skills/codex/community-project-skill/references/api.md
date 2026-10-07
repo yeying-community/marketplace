@@ -2,6 +2,8 @@
 
 ## Authentication
 
+The signed client accepts environment variables or a local TOML file. The precedence is command-line `--config`, `YEYING_PROJECT_CONFIG`, then `~/.yeying/skills/project/config.toml`. The file uses a `[project]` section with `url`, `access_key`, and `secret_key`; `YEYING_PROJECT_URL`, `YEYING_PROJECT_AK`, and `YEYING_PROJECT_SK` override file values when set. A file containing `secret_key` must be mode `0600` or stricter.
+
 Every request sends `X-YY-AK`, `X-YY-Timestamp`, `X-YY-Nonce`, and `X-YY-Signature`.
 The canonical string is:
 
@@ -22,6 +24,7 @@ Sort GET query parameters by name and encode with RFC 3986 rules. Array paramete
 | --- | --- | --- |
 | `projects` | `GET /api/project/lists` | 项目范围 |
 | `tasks` | `GET /api/project/task/lists` | 项目范围 |
+| `task-create` | `POST /api/project/task/add` | 项目范围；需要任务创建权限 |
 | `task` | `GET /api/project/task/one` 等 | 项目范围 |
 | `comment` | `POST /api/dialog/msg/sendtext` | 项目范围；传入 `--update-id` 时编辑当前用户的指定消息 |
 | `update` | `POST /api/project/task/update` | 项目范围 |

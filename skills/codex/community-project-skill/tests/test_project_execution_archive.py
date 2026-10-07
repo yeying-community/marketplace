@@ -13,6 +13,18 @@ import project_execution_archive as archive  # noqa: E402
 
 
 class ExecutionArchiveTest(unittest.TestCase):
+    def test_redaction_keeps_normal_field_names(self):
+        value = archive.redact({
+            "risks": ["保留这段风险"],
+            "tasks": ["保留这段任务"],
+            "secret_key": "hidden",
+            "accessToken": "hidden-too",
+        })
+        self.assertEqual(value["risks"], ["保留这段风险"])
+        self.assertEqual(value["tasks"], ["保留这段任务"])
+        self.assertEqual(value["secret_key"], archive.REDACTED)
+        self.assertEqual(value["accessToken"], archive.REDACTED)
+
     def test_finalize_redacts_and_records_hashes(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -31,6 +43,9 @@ class ExecutionArchiveTest(unittest.TestCase):
                 "missing": ["hidden context"],
                 "records": [{"role": "tool", "content": {"token": "secret", "stdout": "ok"}}],
                 "attachments": [],
+                "lifecycle": {"stage": "verification", "task_id": 123},
+                "repository": {"name": "project"},
+                "verification": [{"passed": True}],
                 "output_dir": str(archive_dir),
             }
             state = archive.finalize_state(state, archive_dir)
@@ -41,6 +56,9 @@ class ExecutionArchiveTest(unittest.TestCase):
             manifest = json.loads((archive_dir / "manifest.json").read_text(encoding="utf-8"))
             self.assertFalse(manifest["complete"])
             self.assertEqual(manifest["taskId"], 123)
+            self.assertEqual(manifest["lifecycleStage"], "verification")
+            transcript_data = json.loads((archive_dir / "transcript.json").read_text(encoding="utf-8"))
+            self.assertEqual(transcript_data["lifecycle"]["stage"], "verification")
             for item in manifest["files"]:
                 self.assertEqual(item["sha256"], hashlib.sha256((archive_dir / item["name"]).read_bytes()).hexdigest())
 

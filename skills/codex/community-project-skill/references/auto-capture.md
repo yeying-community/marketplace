@@ -2,6 +2,22 @@
 
 `community-project-skill` 不直接读取 Codex、Claude 或其他 Agent 的内部会话数据库。客户端必须通过 hook、事件流或 wrapper 输出可公开给宿主的 JSONL 事件，再交给本 Skill 的采集桥接器。
 
+## 任务绑定
+
+采集器可从显式参数、环境变量或工作区标记发现目标任务，优先级如下：
+
+1. `--project-id` 和 `--task-id`；
+2. `YEYING_PROJECT_ID` 和 `YEYING_PROJECT_TASK_ID`；
+3. 当前目录或父目录最近的 `.project-task.json`。
+
+标记文件格式：
+
+```json
+{"project_id": 8, "task_id": 123}
+```
+
+缺少任一 ID 时采集器失败关闭，不会上传。标记文件只保存任务绑定，不保存 AK/SK。
+
 这不是 Project 配置，而是客户端适配层的统一输入协议。适配器只负责把原生事件转换为以下字段，不能上传 AK/SK、Cookie、私钥或隐藏推理内容。
 
 ## 事件格式
@@ -24,10 +40,21 @@
 
 ## 桥接器
 
+Claude Hook 逐事件持久化方式见 [Claude Code Hook 接入](./claude-hooks.md)。批量 JSONL 仍使用下面的桥接器。
+
 ```bash
 cat events.jsonl | python3 scripts/project_execution_capture.py \
   --project-id 8 --task-id 123 --source-tool claude --model claude-sonnet \
   --state /tmp/execution.json --output-dir /tmp/execution \
+  --lifecycle-file /path/to/repository/.project-lifecycle.json \
+  --incomplete --missing "客户端未提供隐藏上下文"
+```
+
+如果工作区存在 `.project-task.json`，可以省略两个 ID 参数：
+
+```bash
+cat events.jsonl | python3 scripts/project_execution_capture.py \
+  --source-tool claude --state /tmp/execution.json --output-dir /tmp/execution \
   --incomplete --missing "客户端未提供隐藏上下文"
 ```
 

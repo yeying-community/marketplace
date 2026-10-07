@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any
 
 from project_api import ProjectApiError
-from project_execution_archive import SCHEMA, finalize_state, load_state, now, publish, redact, write_json
+from project_execution_archive import SCHEMA, attach_lifecycle, finalize_state, load_state, now, publish, redact, write_json
+from project_task_binding import TaskBindingError, resolve_binding
 
 
 ROLE_BY_TYPE = {
@@ -23,10 +24,12 @@ ROLE_BY_TYPE = {
 
 
 def new_state(args: argparse.Namespace) -> dict[str, Any]:
+    binding = resolve_binding(args.project_id, args.task_id, args.binding_root)
     return {
         "schema": SCHEMA,
-        "project_id": args.project_id,
-        "task_id": args.task_id,
+        "project_id": binding["project_id"],
+        "task_id": binding["task_id"],
+        "binding_source": binding["source"],
         "execution_id": args.execution_id or str(uuid.uuid4()),
         "source_tool": args.source_tool,
         "model": args.model,
@@ -38,6 +41,7 @@ def new_state(args: argparse.Namespace) -> dict[str, Any]:
         "attachments": [],
         "event_ids": [],
         "output_dir": str(args.output_dir),
+        "lifecycle_file": str(args.lifecycle_file) if args.lifecycle_file else None,
     }
 
 
@@ -84,22 +88,25 @@ def capture(args: argparse.Namespace) -> dict[str, Any]:
             source.close()
     state["complete"] = args.complete
     state["missing"] = [] if args.complete else (args.missing or ["client did not expose complete native context"])
+    attach_lifecycle(state, args.lifecycle_file)
     state = finalize_state(state, args.output_dir)
     write_json(args.state, state)
     if args.publish:
-        publish(args.state, state)
+        publish(args.state, state, args.config)
     return {"executionId": state["execution_id"], "records": len(state["records"]), "published": bool(args.publish)}
 
 
 def parser() -> argparse.ArgumentParser:
     command = argparse.ArgumentParser(description="把客户端 JSONL 会话事件归档到 Project 任务")
-    command.add_argument("--project-id", type=int, required=True)
-    command.add_argument("--task-id", type=int, required=True)
+    command.add_argument("--project-id", type=int)
+    command.add_argument("--task-id", type=int)
+    command.add_argument("--binding-root", type=Path, help="任务绑定文件搜索起点，默认当前目录")
     command.add_argument("--source-tool", required=True)
     command.add_argument("--model")
     command.add_argument("--execution-id", default=None)
     command.add_argument("--state", type=Path, required=True)
     command.add_argument("--output-dir", type=Path, required=True)
+    command.add_argument("--lifecycle-file", type=Path, help="研发生命周期 JSON 快照")
     command.add_argument("--input-file", type=Path)
     completion = command.add_mutually_exclusive_group()
     completion.add_argument("--complete", action="store_true")
@@ -107,12 +114,13 @@ def parser() -> argparse.ArgumentParser:
     command.set_defaults(complete=False)
     command.add_argument("--missing", action="append", default=[])
     command.add_argument("--publish", action="store_true")
+    command.add_argument("--config", help="Project TOML 配置文件")
     return command
 
 
 if __name__ == "__main__":
     try:
         print(json.dumps(capture(parser().parse_args()), ensure_ascii=False, indent=2))
-    except (OSError, ProjectApiError, ValueError) as exc:
+    except (OSError, ProjectApiError, TaskBindingError, ValueError) as exc:
         print(f"错误: {exc}", file=sys.stderr)
         raise SystemExit(1)
