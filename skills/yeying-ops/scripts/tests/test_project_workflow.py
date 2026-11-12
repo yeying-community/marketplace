@@ -44,13 +44,23 @@ def finding_result():
         "summary": "router failed", "severity": "P1",
         "root_cause": {"category": "likely", "explanation": "bad configuration"},
         "confidence": 0.8, "evidence": ["sanitized evidence"], "impact": ["requests failed"],
-        "recommended_actions": ["review config"], "missing_information": [],
+        "alternative_hypotheses": [{"hypothesis": "dependency outage", "supporting_evidence": [], "contradicting_evidence": ["dependency checks passed"], "verification": "Check dependency health"}],
+        "recommended_actions": ["review config"],
+        "action_plan": [{"action": "review config", "expected": "confirm bad value", "risk": "read only", "undo": "no rollback required"}],
+        "missing_information": [],
         "dedup_fingerprint": "a" * 64, "occurrences": 3, "first_seen": "a", "last_seen": "b",
         "execution": {"model": {"provider": "openai", "model": "gpt-test"}},
     }
 
 
 class ProjectWorkflowTests(unittest.TestCase):
+    def test_audit_content_includes_competing_hypotheses_and_safe_action_details(self):
+        content = project_workflow.audit_content(finding_result(), "router", "a" * 64, dt.date(2026, 10, 22))
+        self.assertIn("备选解释与验证", content)
+        self.assertIn("dependency outage", content)
+        self.assertIn("操作计划（供人工评估）", content)
+        self.assertIn("回退：no rollback required", content)
+
     def test_valid_decision_requires_matching_human_identity(self):
         value = {"schema": project_workflow.DECISION_SCHEMA, "finding_id": "abc", "decision": "monitor", "approved_by": {"user_id": 7, "name": "auditor"}, "approved_at": "2026-10-22T10:00:00+08:00"}
         self.assertIsNotNone(project_workflow.validate_decision(value, "abc", 7, {7}))
