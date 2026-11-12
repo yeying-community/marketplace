@@ -36,10 +36,13 @@ TIMESTAMP_PATTERNS = (
     re.compile(r"\b\d{2}:\d{2}:\d{2}(?:[.,]\d+)?\b"),
 )
 SECRET_PATTERNS = (
-    re.compile(r"(?i)\b(authorization\s*:\s*bearer|bearer|token|api[_-]?key|access[_-]?key|secret[_-]?key|cookie|password|passwd|client[_-]?secret)\s*[:=]\s*[^\s,;]+"),
+    re.compile(r"(?i)\b(?:authorization|proxy-authorization)\s*[:=]\s*(?:bearer|basic)\s+[^\s,;]+"),
+    re.compile(r"(?i)\b(?:authorization|proxy-authorization)\s*[:=]\s*[^\s,;]+"),
+    re.compile(r"(?i)\b(?:cookie|set-cookie)\s*[:=]\s*[^\r\n]+"),
+    re.compile(r"(?i)\b(token|api[_-]?key|access[_-]?key|secret[_-]?key|password|passwd|client[_-]?secret)\s*[:=]\s*[^\s,;]+"),
     re.compile(r"(?i)\b(?:sk-[a-z0-9_-]{8,}|ak-[a-z0-9_-]{8,}|gh[pousr]_[a-z0-9_]{20,}|github_pat_[a-z0-9_]{20,})\b"),
     re.compile(r"\beyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\b"),
-    re.compile(r"-----BEGIN [A-Z0-9 ]*(?:PRIVATE KEY|CERTIFICATE)-----"),
+    re.compile(r"(?s)-----BEGIN (?P<label>[A-Z0-9 ]*(?:PRIVATE KEY|CERTIFICATE))-----.*?-----END (?P=label)-----"),
 )
 ID_PATTERNS = (
     re.compile(r"(?i)\b(?:request|trace|correlation|session)[\s_-]?id\s*[:=]\s*[\"']?[\w.-]+[\"']?"),
@@ -62,7 +65,8 @@ ALLOWED_CATEGORIES = {"confirmed", "likely", "unknown"}
 ALLOWED_SEVERITIES = {"P0", "P1", "P2", "P3"}
 RESULT_FIELDS = {
     "summary", "severity", "root_cause", "confidence", "evidence", "impact",
-    "recommended_actions", "missing_information", "dedup_fingerprint",
+    "alternative_hypotheses", "recommended_actions", "action_plan",
+    "missing_information", "dedup_fingerprint",
     "occurrences", "first_seen", "last_seen",
 }
 
@@ -455,7 +459,9 @@ def upsert_group(connection: sqlite3.Connection, group: ErrorGroup, status: str,
 
 def load_prompt(path: Path, group: ErrorGroup) -> str:
     template = path.read_text(encoding="utf-8").rstrip()
-    case = {"module": group.module, "dedup_fingerprint": group.fingerprint, "occurrences": group.occurrences, "first_seen": group.first_seen, "last_seen": group.last_seen, "normalized_error": group.normalized, "samples": list(group.samples)}
+    # Exact occurrence times stay local. The trusted collector attaches them to
+    # the validated result after analysis, so the model cannot infer or expose them.
+    case = {"module": group.module, "dedup_fingerprint": group.fingerprint, "occurrences": group.occurrences, "normalized_error": group.normalized, "samples": list(group.samples)}
     return template + "\n\nINPUT_CASE_JSON:\n" + json.dumps(case, ensure_ascii=False, indent=2) + "\n"
 
 
@@ -463,6 +469,41 @@ def require_string_list(value: Any, name: str) -> list[str]:
     if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
         raise ValueError(f"{name} must be an array of strings")
     return value
+
+
+def validate_action_plan(value: Any) -> list[dict[str, str]]:
+    if not isinstance(value, list):
+        raise ValueError("action_plan must be an array")
+    required = {"action", "expected", "risk", "undo"}
+    result = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict) or set(item) != required:
+            raise ValueError(f"action_plan[{index}] must contain action, expected, risk, and undo")
+        if any(not isinstance(item[key], str) or not item[key].strip() for key in required):
+            raise ValueError(f"action_plan[{index}] values must be non-empty strings")
+        result.append({key: sanitize_for_model(item[key]) for key in ("action", "expected", "risk", "undo")})
+    return result
+
+
+def validate_alternative_hypotheses(value: Any) -> list[dict[str, Any]]:
+    if not isinstance(value, list):
+        raise ValueError("alternative_hypotheses must be an array")
+    required = {"hypothesis", "supporting_evidence", "contradicting_evidence", "verification"}
+    result = []
+    for index, item in enumerate(value):
+        if not isinstance(item, dict) or set(item) != required:
+            raise ValueError(f"alternative_hypotheses[{index}] has an invalid shape")
+        if not isinstance(item["hypothesis"], str) or not item["hypothesis"].strip() or not isinstance(item["verification"], str) or not item["verification"].strip():
+            raise ValueError(f"alternative_hypotheses[{index}] hypothesis and verification must be non-empty strings")
+        for key in ("supporting_evidence", "contradicting_evidence"):
+            require_string_list(item[key], f"alternative_hypotheses[{index}].{key}")
+        result.append({
+            "hypothesis": sanitize_for_model(item["hypothesis"]),
+            "supporting_evidence": [sanitize_for_model(text) for text in item["supporting_evidence"]],
+            "contradicting_evidence": [sanitize_for_model(text) for text in item["contradicting_evidence"]],
+            "verification": sanitize_for_model(item["verification"]),
+        })
+    return result
 
 
 def validate_result(value: Any, group: ErrorGroup) -> dict[str, Any]:
@@ -490,7 +531,11 @@ def validate_result(value: Any, group: ErrorGroup) -> dict[str, Any]:
     if not 0 <= confidence <= 1:
         raise ValueError("confidence must be between 0 and 1")
     for name in ("evidence", "impact", "recommended_actions", "missing_information"):
-        require_string_list(value[name], name)
+        value[name] = [sanitize_for_model(text) for text in require_string_list(value[name], name)]
+    value["summary"] = sanitize_for_model(value["summary"])
+    root_cause["explanation"] = sanitize_for_model(root_cause["explanation"])
+    value["alternative_hypotheses"] = validate_alternative_hypotheses(value["alternative_hypotheses"])
+    value["action_plan"] = validate_action_plan(value["action_plan"])
     result = dict(value)
     result.update({"confidence": confidence, "dedup_fingerprint": group.fingerprint, "occurrences": group.occurrences, "first_seen": group.first_seen, "last_seen": group.last_seen})
     return result
@@ -586,6 +631,7 @@ def write_summary(results_dir: Path, target_date: dt.date, summary: list[dict[st
             f"- 次数：{item.get('occurrences', 0)}",
             *([f"- 严重程度：{item['severity']}"] if item.get("severity") else []),
             *([f"- 根因分类：{item['category']}"] if item.get("category") else []),
+            *([f"- 置信度：{item['confidence']}"] if item.get("confidence") is not None else []),
             f"- 摘要：{item.get('summary', item.get('reason', ''))}", "",
         ])
     atomic_write(target_dir / "summary.md", "\n".join(lines))
@@ -688,7 +734,7 @@ def analyze(config: dict[str, Any], args: argparse.Namespace) -> tuple[int, dict
                 try:
                     value, stderr, elapsed, model = run_codex(config, prompt, work_dir, result_file, schema_file)
                     result = validate_result(value, group)
-                    result["execution"] = {"elapsed_seconds": round(elapsed, 3), "stderr": stderr, "model": model, "analyzer_schema": "yeying.ops.finding.v1"}
+                    result["execution"] = {"elapsed_seconds": round(elapsed, 3), "stderr": sanitize_for_model(stderr)[:2000], "model": model, "analyzer_schema": "yeying.ops.finding.v2"}
                     result_path = write_result(results_dir, target_date, group, result)
                     category = str(result["root_cause"]["category"])
                     upsert_group(connection, group, "success", result_path=str(result_path), target_date=target_date, category=category)

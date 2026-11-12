@@ -195,6 +195,8 @@ SHA-256(module + NUL + normalized_error)
 
 本地 `project_links` 表保存审计任务 ID、修复任务 ID、决定摘要和最后同步摘要。Project 暂时不可用时不会丢失 finding。
 
+分析结果采用证据优先格式：区分事实与推断，提供备选解释、支持和反对证据及可区分它们的只读验证步骤。建议操作另列预期结果、风险和回退方法，供人工审核，不会被定时程序执行。精确首次和末次发生时间不会发送给模型，由采集器在验证后附加；启用 Project 同步时，时间可作为审计任务的运维元数据。
+
 ### 审计结论
 
 审计人员必须在审计任务中发布 JSON。`approved_by.user_id` 必须等于评论发送人，并属于 `allowed_auditor_ids`。
@@ -246,6 +248,7 @@ SHA-256(module + NUL + normalized_error)
 ### 安全
 
 - 模型样本会删除密钥、token、Authorization、Cookie、邮箱、IP、时间戳、路径和高基数 ID。
+- 除日志输入外，也会再次清理模型生成的文本和 CLI 错误输出；Bearer/Basic 认证头、整行 Cookie/Set-Cookie 和完整 PEM 私钥/证书块会作为整体脱敏。
 - 日志始终是不可信输入；提示词明确禁止把日志解释为指令。
 - Codex 批处理使用 `--ephemeral`、`--ignore-rules`、`--skip-git-repo-check` 和只读 sandbox。
 - 建议保持 `ignore_user_config=true`，避免批处理继承用户规则和 MCP。

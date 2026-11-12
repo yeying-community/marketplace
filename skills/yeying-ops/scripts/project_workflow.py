@@ -170,6 +170,38 @@ def markdown_list(values: Any) -> str:
     return "\n".join(f"- {str(value)}" for value in values)
 
 
+def markdown_action_plan(values: Any) -> str:
+    if not isinstance(values, list) or not values:
+        return "- 无"
+    lines = []
+    for value in values:
+        if not isinstance(value, dict):
+            continue
+        lines.extend([
+            f"- 操作：{value.get('action', '')}",
+            f"  - 预期结果：{value.get('expected', '')}",
+            f"  - 风险：{value.get('risk', '')}",
+            f"  - 回退：{value.get('undo', '')}",
+        ])
+    return "\n".join(lines) or "- 无"
+
+
+def markdown_hypotheses(values: Any) -> str:
+    if not isinstance(values, list) or not values:
+        return "- 无"
+    lines = []
+    for value in values:
+        if not isinstance(value, dict):
+            continue
+        lines.extend([
+            f"- 假设：{value.get('hypothesis', '')}",
+            f"  - 支持证据：{markdown_list(value.get('supporting_evidence'))}",
+            f"  - 反对证据：{markdown_list(value.get('contradicting_evidence'))}",
+            f"  - 验证：{value.get('verification', '')}",
+        ])
+    return "\n".join(lines) or "- 无"
+
+
 def audit_content(result: dict[str, Any], module: str, finding_id: str, target_date: dt.date) -> str:
     root_cause = result.get("root_cause", {}) if isinstance(result.get("root_cause"), dict) else {}
     execution = result.get("execution", {}) if isinstance(result.get("execution"), dict) else {}
@@ -199,6 +231,10 @@ def audit_content(result: dict[str, Any], module: str, finding_id: str, target_d
 
 {root_cause.get('explanation', '')}
 
+## 备选解释与验证
+
+{markdown_hypotheses(result.get('alternative_hypotheses'))}
+
 ## 脱敏证据
 
 {markdown_list(result.get('evidence'))}
@@ -210,6 +246,10 @@ def audit_content(result: dict[str, Any], module: str, finding_id: str, target_d
 ## 建议操作
 
 {markdown_list(result.get('recommended_actions'))}
+
+## 操作计划（供人工评估）
+
+{markdown_action_plan(result.get('action_plan'))}
 
 ## 缺失信息
 
