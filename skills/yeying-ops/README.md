@@ -114,6 +114,8 @@ The finding ID is SHA-256 over `module + NUL + normalized_error`. Audit titles c
 
 The local `project_links` table stores audit-task IDs, remediation-task IDs, decision digests, and synchronization digests. Project downtime does not discard findings.
 
+Findings separate evidence from inference and include a plausible alternative explanation, supporting and contradicting evidence, and a read-only check to distinguish it. Proposed actions carry expected results, risk, and rollback guidance for human review; the scheduled workflow never executes them. Exact first/last occurrence times bypass the model and are attached after validation; when Project sync is enabled, they may appear in the human audit task as operational metadata.
+
 ### Audit Decisions
 
 An auditor must post a `yeying.ops.audit-decision.v1` JSON object. `approved_by.user_id` must match the comment sender and belong to `allowed_auditor_ids`.
@@ -138,6 +140,7 @@ A later Agent handles the remediation task with `yeying-project`, obtains soluti
 ### Security
 
 - Model samples remove credentials, tokens, authorization headers, cookies, email addresses, IP addresses, timestamps, paths, and high-cardinality IDs.
+- Model-generated text and CLI error output are redacted before persistence; Bearer/Basic authorization headers, whole Cookie/Set-Cookie lines, and complete PEM private-key/certificate blocks are removed.
 - Log text is always untrusted prompt-injection input.
 - Batch Codex uses `--ephemeral`, `--ignore-rules`, `--skip-git-repo-check`, and a read-only sandbox.
 - Keep `ignore_user_config=true` unless a reviewed environment requires otherwise.

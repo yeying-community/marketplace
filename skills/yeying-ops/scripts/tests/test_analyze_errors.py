@@ -19,7 +19,9 @@ def valid_result():
         "confidence": 0.1,
         "evidence": [],
         "impact": [],
+        "alternative_hypotheses": [],
         "recommended_actions": [],
+        "action_plan": [],
         "missing_information": ["more logs"],
         "dedup_fingerprint": "model-value",
         "occurrences": 1,
@@ -33,13 +35,26 @@ class AnalyzerTests(unittest.TestCase):
         value = (
             "2026-10-21 10:11:12 ERROR /opt/deploy/router/config.yaml "
             "email=user@example.com ip=10.0.0.8 token=sk-secret123 "
-            "request id: abc123 url=https://user:pass@example.com/a?access_token=secret"
+            "request id: abc123 url=https://user:pass@example.com/a?access_token=secret "
+            "Authorization: Bearer bearer-secret Cookie: session=cookie-secret"
         )
         sanitized = analyze_errors.sanitize_for_model(value)
-        for secret in ("2026-10-21", "/opt/deploy", "user@example.com", "10.0.0.8", "sk-secret123", "abc123", "pass", "access_token=secret"):
+        for secret in ("2026-10-21", "/opt/deploy", "user@example.com", "10.0.0.8", "sk-secret123", "abc123", "pass", "access_token=secret", "bearer-secret", "cookie-secret"):
             self.assertNotIn(secret, sanitized)
         self.assertIn("[PATH]", sanitized)
         self.assertIn("[EMAIL_REDACTED]", sanitized)
+
+    def test_sanitize_redacts_complete_pem_blocks(self):
+        sanitized = analyze_errors.sanitize_for_model("before\n-----BEGIN PRIVATE KEY-----\nprivate-material\n-----END PRIVATE KEY-----\nafter")
+        self.assertNotIn("private-material", sanitized)
+        self.assertIn("[SECRET_REDACTED]", sanitized)
+
+    def test_prompt_omits_trusted_occurrence_times(self):
+        group = analyze_errors.ErrorGroup("router", "abc", "error", ("ERROR sample",), 2, "2026-10-21T01:02:03+08:00", "2026-10-21T04:05:06+08:00")
+        prompt = analyze_errors.load_prompt(analyze_errors.DEFAULT_PROMPT, group)
+        self.assertNotIn(group.first_seen, prompt)
+        self.assertNotIn(group.last_seen, prompt)
+        self.assertIn('"occurrences": 2', prompt)
 
     def test_normalize_redacts_ids_and_numbers(self):
         normalized = analyze_errors.normalize_error("ERROR request_id=abc123 user=42")
@@ -133,6 +148,23 @@ class AnalyzerTests(unittest.TestCase):
         result = analyze_errors.validate_result(valid_result(), group)
         self.assertEqual(result["dedup_fingerprint"], "abc")
         self.assertEqual(result["occurrences"], 2)
+
+    def test_validate_result_requires_action_safety_and_alternative_shape(self):
+        group = analyze_errors.ErrorGroup("router", "abc", "error", ("error",), 1, "a", "b")
+        value = valid_result()
+        value["alternative_hypotheses"] = [{
+            "hypothesis": "a cache issue token=secret-value",
+            "supporting_evidence": ["cache miss"],
+            "contradicting_evidence": [],
+            "verification": "Inspect cache metrics",
+        }]
+        value["action_plan"] = [{"action": "inspect logs", "expected": "confirm scope", "risk": "read only", "undo": "no rollback required"}]
+        result = analyze_errors.validate_result(value, group)
+        self.assertNotIn("secret-value", result["alternative_hypotheses"][0]["hypothesis"])
+        self.assertEqual(result["action_plan"][0]["undo"], "no rollback required")
+        value["action_plan"] = [{"action": "unsafe", "expected": "x", "risk": "y"}]
+        with self.assertRaisesRegex(ValueError, "action_plan"):
+            analyze_errors.validate_result(value, group)
 
     def test_validate_result_rejects_invalid_nested_type(self):
         group = analyze_errors.ErrorGroup("router", "abc", "error", ("error",), 1, "a", "b")
