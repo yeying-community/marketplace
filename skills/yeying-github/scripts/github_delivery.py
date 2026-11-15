@@ -88,27 +88,10 @@ def resolve_script(root: Path, configured_path: str) -> Path:
     return path if path.is_absolute() else root / path
 
 
-def commit_subjects() -> list[str]:
-    for revision in ("upstream/main..HEAD", "origin/main..HEAD"):
-        try:
-            output = git_output("log", "--reverse", "--format=%s", revision)
-        except subprocess.CalledProcessError:
-            continue
-        subjects = [line.strip() for line in output.splitlines() if line.strip()]
-        if subjects:
-            return subjects
-    return []
-
-
 def default_body(title: str) -> str:
-    subjects = commit_subjects()
-    lines = ["## Summary", f"- {title}"]
-    if subjects:
-        lines.extend(["", "## Commits"])
-        lines.extend(f"- {subject}" for subject in subjects[:20])
-        if len(subjects) > 20:
-            lines.append(f"- ... and {len(subjects) - 20} more commits")
-    return "\n".join(lines) + "\n"
+    # GitHub already renders the PR's exact commit list. Deriving another list
+    # from local remote-tracking refs can include stale or already-merged commits.
+    return f"## Summary\n- {title}\n"
 
 
 def read_body(args: argparse.Namespace, title: str) -> str:

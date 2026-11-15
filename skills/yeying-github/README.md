@@ -281,4 +281,4 @@ python3 scripts/github_delivery.py --dry-run \
   --title "chore(scope): accurately describe the delivery"
 ```
 
-In API mode, explicitly passing `--body` or `--body-file` updates an existing PR body. Without either option, the wrapper generates a default body only for a new PR and preserves an existing human-maintained body.
+In API mode, explicitly passing `--body` or `--body-file` updates an existing PR body. Without either option, the wrapper generates a summary-only body for a new PR and preserves an existing human-maintained body. It omits commit history because GitHub already displays the PR's exact commits, while local remote-tracking refs may be stale.

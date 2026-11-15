@@ -281,4 +281,4 @@ python3 scripts/github_delivery.py --dry-run \
   --title "chore(scope): accurately describe the delivery"
 ```
 
-API 模式下，显式传入 `--body` 或 `--body-file` 会更新已有 PR 的正文；不传时仅为新 PR 生成默认正文，并保留已有 PR 的人工正文。
+API 模式下，显式传入 `--body` 或 `--body-file` 会更新已有 PR 的正文；不传时仅为新 PR 生成摘要正文，并保留已有 PR 的人工正文。默认正文不再重复列提交历史，因为 GitHub 已显示 PR 实际包含的提交，而本地远程跟踪引用可能过期。

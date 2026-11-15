@@ -40,12 +40,11 @@ class GitHubDeliveryTests(unittest.TestCase):
         with self.assertRaises(SystemExit):
             github_delivery.validate_title("update")
 
-    def test_default_body_lists_complete_commit_range(self) -> None:
-        with mock.patch.object(github_delivery, "commit_subjects", return_value=["first", "second"]):
-            body = github_delivery.default_body("feat: useful delivery")
+    def test_default_body_does_not_duplicate_or_misstate_commit_history(self) -> None:
+        body = github_delivery.default_body("feat: useful delivery")
         self.assertIn("- feat: useful delivery", body)
-        self.assertIn("- first", body)
-        self.assertIn("- second", body)
+        self.assertNotIn("## Commits", body)
+        self.assertEqual(body, "## Summary\n- feat: useful delivery\n")
 
     def test_api_command_carries_explicit_title(self) -> None:
         args = argparse.Namespace(

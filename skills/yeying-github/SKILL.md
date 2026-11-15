@@ -73,7 +73,7 @@ python3 /path/to/yeying-github/scripts/github_delivery.py \
 5. Run with `--dry-run` first for API delivery or whenever remote state is uncertain.
 6. Execute the real command only after the user authorizes the external write. Verify `HEAD`, `origin/main`, tree equality, and the final PR URL.
 
-Use `--body-file` when a reviewed PR body should be applied. In API mode, an explicitly supplied `--body` or `--body-file` updates the body of an existing PR; when neither is supplied, the wrapper builds a concise body from the commit range and preserves any existing human-maintained body. Existing PRs are reused and their title is corrected when it differs from the requested title.
+Use `--body-file` when a reviewed PR body should be applied. In API mode, an explicitly supplied `--body` or `--body-file` updates the body of an existing PR; when neither is supplied, the wrapper creates a summary-only body for a new PR and preserves any existing human-maintained body. It does not duplicate commit history in the body because GitHub already shows the exact PR commits, while local remote-tracking refs may be stale. Existing PRs are reused and their title is corrected when it differs from the requested title.
 
 ## Permission Boundary
 
