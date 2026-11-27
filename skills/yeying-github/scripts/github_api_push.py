@@ -159,7 +159,12 @@ def commit_meta(sha: str) -> dict[str, Any]:
 
 
 def changed_paths(sha: str) -> list[dict[str, str]]:
-    raw = run_git(["diff-tree", "--no-commit-id", "--name-status", "-r", sha])
+    # -c core.quotepath=false: emit raw UTF-8 paths instead of the C-style
+    # quoted form ("docs/\347\237..."). Feeding a quoted path back to `git show`
+    # fails with exit 128, so a CJK filename would break the push.
+    raw = run_git(
+        ["-c", "core.quotepath=false", "diff-tree", "--no-commit-id", "--name-status", "-r", sha]
+    )
     if not raw:
         return []
     changes = []
@@ -174,7 +179,7 @@ def changed_paths(sha: str) -> list[dict[str, str]]:
 
 
 def file_mode_at(sha: str, path: str) -> str:
-    raw = run_git(["ls-tree", sha, "--", path])
+    raw = run_git(["-c", "core.quotepath=false", "ls-tree", sha, "--", path])
     if not raw:
         return "100644"
     return str(raw).split()[0]
