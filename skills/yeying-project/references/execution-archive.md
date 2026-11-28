@@ -4,6 +4,8 @@
 
 ## 生命周期
 
+同一任务由新的独立执行接手时，为其指定独立的 `--state` 与 `--output-dir`。同一次执行的采集重试沿用原路径和执行 ID。
+
 每次执行使用一个稳定的 `executionId`。调用方负责把能够取得的记录传给脚本：
 
 ```bash
@@ -32,6 +34,10 @@ python3 scripts/project_execution_archive.py publish \
 本地执行状态和输出目录必须按任务隔离，存放于 `.project/execution-<task-id>.json` 与 `.project/execution-<task-id>/`。不要让多个任务共享同一个状态文件或输出目录。
 
 ## Agent 与模型信息
+
+每次执行的 `manifest.json` 记录客户端、主模型和 `executionId`。宿主提供可用于本地定位的会话 ID 时，可在 `start`、批量采集或首次 Hook 事件上指定 `--session-id`。省略时，归档从已采集事件中提取唯一的原生会话 ID（包括 Codex 的 `thread.started.thread_id` 和 Claude 的 `session_id`）。存在多个候选时保留事件明细。清单与 `transcript.json` 的 `conversation` 使用可选字段 `clientSessionId`；未提供的模型按下述缺失规则处理。
+
+在保有会话历史的本地账号和工作区中，用清单里的 `clientSessionId` 执行 `codex resume <会话ID>` 或 `claude --resume <会话ID>`。其他客户端按其恢复方式操作。成功打开后才标注会话可恢复。普通任务评论写本次工作结论，执行来源集中在归档引用和附件中。
 
 宿主能够提供当前模型时，必须把真实模型 ID 传给 `--model`。不要根据 `--source-tool`、客户端名称或供应商默认值猜测模型。模型不可得时，状态和 manifest 会保留 `model_missing_reason`，默认说明宿主未暴露当前模型。
 

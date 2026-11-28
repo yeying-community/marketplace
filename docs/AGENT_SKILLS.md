@@ -12,6 +12,12 @@ Agent 执行类技能面向 Codex、Claude 和其他兼容 `SKILL.md` 的客户�
 
 所有 Skill 共用 `skills/<skill-id>/` 全局命名空间。Agent 格式使用 `SKILL.md`，Chat 格式使用 `<lang>.json`；同一个 Skill 可以同时支持两种格式。只有存在 `cn.json` 或 `en.json` 的 Skill 才会被 `scripts/build.mjs` 写入 Chat 的 `packages.json`。
 
+## Project 任务中的开发记录
+
+使用 `yeying-project` 时，任务讨论用于请求决定、报告影响计划的阻塞和交付验收结果。每次反馈说明结论、依据或链接，以及需要谁采取什么行动。正式方案按被改仓库的文档结构维护，审批引用评审版本。局部修复可以直接在任务中说明做法和验收条件，并在交付时关联 PR。
+
+执行归档按次保存客户端、模型、可获得的原生会话 ID 和脱敏过程记录。任务成员从归档附件追溯细节，执行者可用原客户端在本机定位会话。具体字段及发布示例见[生命周期指引](../skills/yeying-project/references/lifecycle.md)和[执行归档](../skills/yeying-project/references/execution-archive.md)。
+
 ## 目录结构
 
 每个 Skill 使用独立的一级目录；Agent 入口和支持资源如下：

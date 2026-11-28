@@ -95,21 +95,23 @@ class LifecycleTest(unittest.TestCase):
             lifecycle.advance(state, "verification")
             self.assertEqual(state["stage"], "verification")
 
-    def test_record_comment_summarizes_and_collapses_raw_data(self):
+    def test_public_comment_links_to_proposal_and_keeps_details_in_record(self):
         state = self.state()
         record = {
-            "kind": "documentation",
+            "kind": "solution",
             "recorded_at": "2026-01-01T00:00:00Z",
             "sha256": "a" * 64,
             "data": {
-                "paths": ["docs"], "status": "checked", "updated": True,
-                "no_update_reason": "", "cross_project_impact": "无",
+                "recommendation": "保持 API 兼容", "acceptance_criteria": ["旧客户端可读"],
+                "document_url": "https://example.org/proposal", "next_step": "维护者确认",
+                "comparison": {"internal": "审计明细"},
             },
         }
         rendered = lifecycle.render_record_comment(state, record)
-        self.assertIn("文档收口", rendered)
-        self.assertIn("<details>", rendered)
-        self.assertIn("查看结构化原始记录", rendered)
+        for item in ("保持 API 兼容", "旧客户端可读", "https://example.org/proposal", "维护者确认"):
+            self.assertIn(item, rendered)
+        self.assertNotIn("审计明细", rendered)
+        self.assertEqual(record["data"]["comparison"]["internal"], "审计明细")
 
     def test_record_requires_contract_fields_and_is_idempotent(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -126,6 +128,10 @@ class LifecycleTest(unittest.TestCase):
             second = lifecycle.add_record(state, "verification", lifecycle.load_record(source), source)
             self.assertEqual(first["sha256"], second["sha256"])
             self.assertEqual(len(state["records"]), 1)
+            updated = dict(first["data"], results="再次验证", summary="验证通过")
+            lifecycle.add_record(state, "verification", updated, source)
+            self.assertEqual(state["previous_records"], [first])
+            self.assertEqual(lifecycle.record_for(state, "verification")["data"], updated)
 
     def test_publish_record_is_idempotent(self):
         state = self.state()

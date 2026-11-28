@@ -21,6 +21,7 @@ class ClientAdapterTest(unittest.TestCase):
         })
         self.assertEqual(event["type"], "tool_result")
         self.assertEqual(event["role"], "tool")
+        self.assertEqual(event["session_id"], "s1")
         self.assertEqual(event["metadata"]["tool_name"], "exec_command")
         self.assertEqual(event["metadata"]["model"], "claude-sonnet-4")
         self.assertEqual(event["metadata"]["client_version"], "1.2.3")
@@ -42,6 +43,11 @@ class ClientAdapterTest(unittest.TestCase):
         self.assertEqual(first["metadata"]["model_provider"], "openai")
         self.assertEqual(first["metadata"]["reasoning_effort"], "high")
         json.dumps(first, ensure_ascii=False)
+
+    def test_codex_thread_started_supplies_native_session(self):
+        event = codex.normalize({"type": "thread.started", "thread_id": "thread-1"})
+        self.assertEqual(event["session_id"], "thread-1")
+        self.assertNotIn("session_id", codex.normalize({"type": "done", "id": "event-1"}))
 
 
 if __name__ == "__main__":

@@ -12,7 +12,8 @@
 - Bind a local workspace to an explicit Project task.
 - Isolate parallel tasks with task-ID-suffixed local files.
 - Record analysis, approval, documentation, verification, commits, and pull request results.
-- Archive the execution history and real model information exposed by Codex, Claude, or another Agent.
+- Publish decisions, blockers and verification outcomes as short task updates. Link long-lived designs in the affected project's `docs/` to the reviewed revision or PR.
+- Archive the client, host-reported model, optional native session ID and redacted execution details together. See the [lifecycle guide](references/lifecycle.md) and [local recovery instructions](references/execution-archive.md).
 - Manage the Project file cabinet and publish reviewed local documents.
 
 ### Configuration

@@ -120,6 +120,7 @@ class ExecutionArchiveTest(unittest.TestCase):
 
             manifest = json.loads((archive_dir / "manifest.json").read_text(encoding="utf-8"))
             self.assertEqual(manifest["agent"]["models"], [])
+            self.assertNotIn("clientSessionId", manifest)
             self.assertEqual(
                 manifest["agent"]["model_missing_reason"],
                 "host did not expose the active model",

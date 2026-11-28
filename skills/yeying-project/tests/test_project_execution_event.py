@@ -12,6 +12,22 @@ import project_execution_event as event  # noqa: E402
 
 
 class ExecutionEventTest(unittest.TestCase):
+    def test_fresh_hook_process_reuses_bound_execution(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            args = ["--binding-root", tmp, "--project-id", "8", "--task-id", "123", "--source-tool", "claude"]
+            start = {"event_id": "one", "session_id": "native", "type": "session_start"}
+            end = {"event_id": "two", "type": "session_end"}
+            with mock.patch.object(sys, "stdin", io.StringIO(json.dumps(start))):
+                first = event.append_event(event.parser().parse_args(args))
+            with mock.patch.object(sys, "stdin", io.StringIO(json.dumps(end))):
+                last = event.append_event(event.parser().parse_args(args + ["--finalize"]))
+            manifest = json.loads((Path(tmp) / ".project/execution-123/manifest.json").read_text())
+            self.assertEqual(first["executionId"], last["executionId"])
+            self.assertEqual(manifest["clientSessionId"], "native")
+            self.assertEqual(manifest["recordCount"], 2)
+            with self.assertRaisesRegex(event.ProjectApiError, "execution_id"):
+                event.append_event(event.parser().parse_args(args + ["--execution-id", "different"]))
+
     def test_append_is_restart_safe_and_finalize_is_explicit(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

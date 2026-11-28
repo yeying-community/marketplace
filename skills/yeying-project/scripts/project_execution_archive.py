@@ -210,6 +210,17 @@ def finalize_state(state: dict[str, Any], output_dir: Path) -> dict[str, Any]:
         agent["model_missing_reason"] = "host did not expose the active model"
     output_dir.mkdir(parents=True, exist_ok=True)
     state["records"] = redact(state.get("records", []))
+    # Only promote a single unambiguous client session to the archive index.
+    session_ids = set()
+    for record in state["records"]:
+        metadata = record.get("metadata") if isinstance(record, dict) else None
+        if isinstance(metadata, dict) and isinstance(metadata.get("session_id"), str):
+            session_ids.add(metadata["session_id"].strip())
+    session_ids.discard("")
+    session_id = state.get("client_session_id")
+    if not session_id and len(session_ids) == 1:
+        session_id = session_ids.pop()
+    session_fields = {"clientSessionId": session_id} if session_id else {}
     state["attachments"] = redact(state.get("attachments", []))
     if state.get("summary") is not None:
         state["summary"] = redact(state["summary"])
@@ -229,6 +240,7 @@ def finalize_state(state: dict[str, Any], output_dir: Path) -> dict[str, Any]:
             "projectId": state["project_id"],
             "taskId": state["task_id"],
             "executionId": state["execution_id"],
+            **session_fields,
             "sourceTool": state["source_tool"],
             "model": state.get("model"),
             "agent": agent,
@@ -256,6 +268,7 @@ def finalize_state(state: dict[str, Any], output_dir: Path) -> dict[str, Any]:
     manifest = {
         "schema": SCHEMA,
         "executionId": state["execution_id"],
+        **session_fields,
         "projectId": state["project_id"],
         "taskId": state["task_id"],
         "sourceTool": state["source_tool"],
@@ -347,7 +360,7 @@ def publish(
             f"执行工具：`{agent.get('source_tool') or 'unknown'}`；"
             f"主模型：`{model_name or 'unknown'}`。\n"
             f"状态：{state['status']}；完整：{str(state.get('complete', False)).lower()}。\n"
-            f"归档文件：{', '.join(item['name'] for item in uploaded)}。"
+            "详见任务附件中的执行摘要和清单。"
         )
         params = {
             "dialog_id": dialog_id, "text": comment, "text_type": "md",
@@ -367,6 +380,7 @@ def build_parser() -> argparse.ArgumentParser:
     start.add_argument("--project-id", type=int, required=True)
     start.add_argument("--task-id", type=int, required=True)
     add_agent_arguments(start, include_source_tool=True, source_tool_required=True)
+    start.add_argument("--session-id", help="客户端提供的本地会话 ID")
     start.add_argument("--execution-id")
     start.add_argument("--lifecycle-file", type=Path, help="研发生命周期 JSON 快照")
     start.add_argument("--state", type=Path, help="默认写入当前目录 .project/execution-<task-id>.json")
@@ -418,6 +432,7 @@ def main() -> int:
                 "project_id": args.project_id,
                 "task_id": args.task_id,
                 "execution_id": args.execution_id or str(uuid.uuid4()),
+                "client_session_id": redact(args.session_id),
                 "source_tool": agent.get("source_tool") or args.source_tool,
                 "model": primary_model(agent),
                 "agent": agent,
