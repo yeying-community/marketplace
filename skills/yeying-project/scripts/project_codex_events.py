@@ -33,6 +33,7 @@ def normalize(payload: dict[str, Any], line_number: int = 0) -> dict[str, Any]:
         "tool_result": "tool_result",
         "error": "session_error",
         "done": "session_end",
+        "thread.started": "session_start",
     }
     event_type = type_aliases.get(raw_type, raw_type)
     role = value(payload, "role")
@@ -54,6 +55,8 @@ def normalize(payload: dict[str, Any], line_number: int = 0) -> dict[str, Any]:
         "content": content,
     }
     session_id = value(payload, "session_id", "sessionId")
+    if session_id is None and raw_type == "thread.started":
+        session_id = payload.get("thread_id")
     if session_id is not None:
         event["session_id"] = session_id
     metadata = value(payload, "metadata")

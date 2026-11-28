@@ -73,10 +73,10 @@ python3 scripts/project_api.py download --file-id 456 --output /tmp/document.pdf
 # lifecycle state and gates
 python3 scripts/project_lifecycle.py create --project-id 8 --name "实现某功能" --workdir /path/to/repository --times '["2026-10-24 09:00","2026-10-25 18:00"]' --content-file /tmp/request.md --source-tool codex --model "<model-id>"
 python3 scripts/project_lifecycle.py bind --project-id 8 --task-id 123 --workdir /path/to/repository --source-tool codex --model "<model-id>"
-python3 scripts/project_lifecycle.py record --state /path/to/repository/.project/lifecycle-123.json --kind analysis --file /tmp/analysis.json --publish
-python3 scripts/project_lifecycle.py record --state /path/to/repository/.project/lifecycle-123.json --kind documentation --file /tmp/documentation.json --publish
+python3 scripts/project_lifecycle.py record --state /path/to/repository/.project/lifecycle-123.json --kind analysis --file /tmp/analysis.json
+python3 scripts/project_lifecycle.py record --state /path/to/repository/.project/lifecycle-123.json --kind solution --file /tmp/solution.json --publish
 python3 scripts/project_lifecycle.py approve --state /path/to/repository/.project/lifecycle-123.json --by "负责人" --reference "Project 评论或会议记录引用"
-python3 scripts/project_lifecycle.py archive-link --state /path/to/repository/.project/lifecycle-123.json --manifest /path/to/repository/.project/execution-123/manifest.json --publish
+python3 scripts/project_lifecycle.py archive-link --state /path/to/repository/.project/lifecycle-123.json --manifest /path/to/repository/.project/execution-123/manifest.json
 python3 scripts/project_lifecycle.py advance --state /path/to/repository/.project/lifecycle-123.json --to implementation
 
 # Task execution archive
@@ -140,7 +140,7 @@ All successful commands print JSON to stdout. Failures print a concise error to 
 
 1. Resolve or create the task. If the user gives a task ID, call `task`; otherwise list `projects` and `tasks`, or use `task-create` when the request has no existing task.
 2. Bind the repository with `project_lifecycle.py bind` or create-and-bind it with `project_lifecycle.py create`. For AK/SK requests, omitting `--owner` makes Project assign the task to the user who issued the current credential; use `--owner` only to assign another Project member, and `--allow-unassigned` only for an intentionally unclaimed backlog task. Concrete development tasks must pass `--times '["start","end"]'`; `create` fails closed when the plan window is missing unless `--allow-unscheduled` is explicit. Deploy the Project server support before a client version that relies on this default-owner behavior. Ignore the repository-root `/.project/` directory; keep AK/SK out of it. Existing root-level `.project-*` state remains supported for compatibility.
-3. Read the task title, description, content, members, tags, and recent discussion. Record the analysis and feasible solution, including scope, non-goals, risks, acceptance criteria, and test plan.
+3. Read the task and recent discussion. Record scope, risks, alternatives, acceptance criteria and test plan. For durable architecture, API, permission or cross-project decisions, maintain the proposal in the affected repository's existing `docs/` structure. For a small local change, record the recommendation and acceptance criteria in the task. Link the reviewed document version or PR when available.
 4. Obtain explicit solution approval and advance the lifecycle gate before changing code. A verbal or hidden approval that has no traceable reference does not satisfy the gate.
 5. Inspect the local repository and perform the requested work using its own instructions and quality gates. Keep structured implementation records in the lifecycle state.
 6. Before verification, inspect and update affected local `docs` and `books/yeying` documents. Record the paths, update status, no-change reason when applicable, and cross-project impact as a `documentation` record. PlantUML is optional and should be used only when it makes a complex flow easier to read.
@@ -152,6 +152,8 @@ All successful commands print JSON to stdout. Failures print a concise error to 
 Task comments, lifecycle record publication, and execution archive publication automatically call Project's task-dialog endpoint. If the task has no `dialog_id`, Project creates the chat and returns its reusable ID. The caller still needs project membership and task visibility.
 
 ## Task Execution Archive
+
+Record the client, host-reported model and optional native session ID once per execution. Pass a known client session ID with `--session-id` when starting the archive or let the capture bridge index it from client events. Use the archive manifest to look it up for local recovery. See [execution archive](references/execution-archive.md) for availability and recovery conditions.
 
 When an AI client or Agent is carrying out a concrete Project task, preserve the complete history available to the caller: user messages, assistant messages, tool calls, tool results, attachment references, decisions, and the final result. Start an `executionId`, append records as they become available, finalize the three archive files, then publish them to the task. The archive must be marked incomplete when the host cannot expose hidden context or full tool output. Use the same `executionId` for retries so publication can verify and reuse existing task attachments.
 
@@ -222,7 +224,8 @@ See [references/document-sync.md](references/document-sync.md) for the JSON conf
 
 - Write comments in the user's language unless the task establishes another language.
 - Keep comments factual and compact. Prefer a short heading followed by flat bullets.
-- Put the decision, current stage, next step, verification state, and missing items before large raw records. Wrap raw JSON or tool output in `<details>` when the Project Markdown renderer supports it; never remove the redacted source record.
+- Publish a short member-facing update when there is a decision to make, a scope or plan change, an actionable blocker, or a verification or delivery result. Include the recommendation, concrete acceptance criteria or result, and who needs to act next where relevant. Link the reviewed proposal or PR.
+- Keep routine reads, successful intermediate commands, retries, raw JSON and tool output in the execution archive. Record local lifecycle steps without `--publish` unless they change what members need to know. Combine final verification and PR information in one update when available together. Archive publication supplies its own task reference.
 - For multiline comments, use `--content-file` and write real line breaks. The client also normalizes literal `\\n` sequences from agent command invocations.
 - Task details use the Project rich-text HTML contract. Pass Markdown through `update --content` or `update --content-file`; the client converts headings, lists, inline code, emphasis, and HTTP(S) links to editor HTML. Use `--content-format html` only when the input is already Project editor HTML.
 - Do not expose secrets, local environment variables, private filesystem paths, or unrelated repository state.

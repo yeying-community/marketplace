@@ -11,14 +11,15 @@ from pathlib import Path
 
 from project_agent_context import add_agent_arguments, context_from_args, event_agent_context, merge_state_agent_context
 from project_api import ProjectApiError
-from project_execution_archive import attach_lifecycle, finalize_state, load_state, now, publish, write_json
-from project_execution_capture import new_state, normalize_event, prepare_new_state
+from project_execution_archive import attach_lifecycle, finalize_state, now, publish, write_json
+from project_execution_capture import new_state, normalize_event, prepare_new_state, resume_state
 from project_task_binding import TaskBindingError
 
 
 def append_event(args: argparse.Namespace) -> dict[str, object]:
+    binding = prepare_new_state(args) if args.state is None else None
     if args.state is not None and args.state.exists():
-        state = load_state(args.state)
+        state = resume_state(args, binding)
         args.output_dir = args.output_dir or Path(state["output_dir"])
         merge_state_agent_context(
             state,
@@ -26,7 +27,6 @@ def append_event(args: argparse.Namespace) -> dict[str, object]:
             locked=bool(state.get("finalized_at")),
         )
     else:
-        binding = prepare_new_state(args)
         state = new_state(args, binding)
     payload = json.load(sys.stdin)
     if not isinstance(payload, dict):
@@ -66,6 +66,7 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--binding-root", type=Path)
     add_agent_arguments(command, include_source_tool=True, source_tool_required=True)
     command.add_argument("--execution-id")
+    command.add_argument("--session-id", help="客户端提供的本地会话 ID")
     command.add_argument("--state", type=Path, help="默认写入绑定目录 .project/execution-<task-id>.json")
     command.add_argument("--output-dir", type=Path, help="默认写入绑定目录 .project/execution-<task-id>/")
     command.add_argument("--lifecycle-file", type=Path, help="研发生命周期 JSON 快照")

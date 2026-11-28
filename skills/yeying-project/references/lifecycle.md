@@ -47,12 +47,12 @@ python3 scripts/project_lifecycle.py create \
 
 ```bash
 python3 scripts/project_lifecycle.py record --state .project/lifecycle-123.json \
-  --kind analysis --file /tmp/analysis.json --publish \
+  --kind analysis --file /tmp/analysis.json \
   --config ~/.yeying/skills/project/config.toml
 python3 scripts/project_lifecycle.py record --state .project/lifecycle-123.json \
   --kind solution --file /tmp/solution.json --publish
 python3 scripts/project_lifecycle.py record --state .project/lifecycle-123.json \
-  --kind documentation --file /tmp/documentation.json --publish
+  --kind documentation --file /tmp/documentation.json
 ```
 
 建议字段：
@@ -64,7 +64,11 @@ python3 scripts/project_lifecycle.py record --state .project/lifecycle-123.json 
 - `pull_request`：`repository`、`branch`、`commit_sha`、`url`、`number`、`state`、`ci`、`review`、`merged_at`；
 - `execution_archive`：`execution_id`、`manifest_sha256`、`complete`、`missing`、`published_at`。
 
-负责人确认必须显式记录：
+申请审批时，在任务中写清推荐方案、具体验收条件及需要谁决定什么。涉及架构、API、权限、跨项目行为或后续维护约定时，按被改项目已有目录在 `docs/` 新建或更新方案。文档有远端版本后，通过 `document_url` 引用任务成员可访问的提交固定链接或 PR。审批时记录所审版本，实质性修订后重新确认。小型局部调整用任务摘要和交付 PR 即可。
+
+记录默认保存在本地。需要成员行动、计划发生变化或有验收结果时才加 `--publish`。可用 `summary` 写一句面向成员的结论，`next_step` 写负责人及下一步。交付时可在 PR 记录的 `summary` 中合并验证结果和剩余问题。结构化详情和被修订的历史记录随生命周期快照进入执行归档。
+
+负责人确认后记录审批人和可追溯引用。
 
 ```bash
 python3 scripts/project_lifecycle.py approve \
@@ -144,7 +148,7 @@ python3 scripts/project_execution_archive.py start \
 ```bash
 python3 scripts/project_lifecycle.py archive-link \
   --state .project/lifecycle-123.json \
-  --manifest .project/execution-123/manifest.json --publish
+  --manifest .project/execution-123/manifest.json
 ```
 
 只有通过该校验并关联到当前 Project/Task 的归档，才满足 `audit` 到 `completed` 的执行归档门禁。

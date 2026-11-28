@@ -241,6 +241,7 @@ def add_record(state: dict[str, Any], kind: str, payload: dict[str, Any], source
     if previous and previous["sha256"] == record["sha256"]:
         return previous
     if previous:
+        state.setdefault("previous_records", []).append(previous)
         state["records"].remove(previous)
     state["records"].append(record)
     state["updated_at"] = now()
@@ -312,37 +313,44 @@ def render_record_comment(state: dict[str, Any], record: dict[str, Any]) -> str:
     marker = f"[lifecycle:{state['task_id']}:{record['kind']}:{record['sha256'][:16]}]"
     data = record["data"]
     summary = record_summary(record["kind"], data)
-    return (
-        f"{marker} 研发流程记录：{record['kind']}\n\n"
-        f"阶段：{state['stage']}\n"
-        f"记录时间：{record['recorded_at']}\n\n"
-        f"{summary}\n\n"
-        "<details>\n<summary>查看结构化原始记录</summary>\n\n"
-        "```json\n"
-        + json.dumps(data, ensure_ascii=False, indent=2)
-        + "\n```\n\n</details>"
-    )
+    sections = [summary]
+    if data.get("next_step"):
+        sections.append(f"**下一步** {data['next_step']}")
+    url = data.get("document_url")
+    if isinstance(url, str) and url.startswith(("https://", "http://")):
+        sections.append(f"[查看方案文档]({url})")
+    sections.append(marker)
+    return "\n\n".join(sections)
 
 
 def record_summary(kind: str, data: dict[str, Any]) -> str:
-    """Render a compact, scannable task update without hiding its raw record."""
+    """Render the member-facing fields. The full record stays in the archive."""
+    summary = data.get("summary")
+    summary = summary.strip() if isinstance(summary, str) else ""
     if kind == "analysis":
-        return f"**需求理解**：{data.get('understanding', '')}\n\n**范围**：{len(data.get('in_scope', []))} 项；**风险**：{len(data.get('risks', []))} 项。"
+        return f"**需求结论** {summary or data.get('understanding', '')}"
     if kind == "solution":
-        return f"**推荐方案**：{data.get('recommendation', '')}\n\n**验收标准**：{len(data.get('acceptance_criteria', []))} 项；**测试计划**：{len(data.get('test_plan', []))} 项。"
+        criteria = data.get("acceptance_criteria", [])
+        if isinstance(criteria, list):
+            criteria = "、".join(item for item in criteria if isinstance(item, str))
+        result = f"**推荐方案** {summary or data.get('recommendation', '')}"
+        return result + (f"\n\n**验收标准** {criteria}" if isinstance(criteria, str) and criteria else "")
     if kind == "documentation":
-        return f"**文档收口**：{data.get('status', '')}\n\n**检查路径**：{len(data.get('paths', []))} 个；**跨项目影响**：{data.get('cross_project_impact', '')}"
+        return f"**文档收口** {summary or data.get('status', '')}"
     if kind == "verification":
-        return f"**验证结果**：{'通过' if data.get('passed') is True else '未通过'}\n\n**环境**：{data.get('environment', '')}"
+        result = "通过" if data.get("passed") is True else "未通过"
+        return f"**验证结果** {result}" + (f"。{summary}" if summary else "")
     if kind == "pull_request":
-        return f"**交付**：[{data.get('branch', '')}]({data.get('url', '')})\n\n**Commit**：`{data.get('commit_sha', '')}`"
+        return f"**交付** [查看 PR]({data.get('url', '')}) · `{data.get('commit_sha', '')}`" + (f"\n\n{summary}" if summary else "")
     if kind == "execution_archive":
         model_name = primary_model(data.get("agent")) or data.get("model") or "unknown"
         return (
             f"**执行归档**：`{data.get('execution_id', '')}`，完整：`{str(data.get('complete', False)).lower()}`\n\n"
             f"**执行工具**：`{data.get('source_tool') or 'unknown'}`；**主模型**：`{model_name}`"
         )
-    return f"**记录类型**：`{kind}`"
+    labels = {"decision": "决策", "implementation": "实施进展", "review": "审阅结论"}
+    detail = summary or data.get("decision") or data.get("status")
+    return f"**{labels[kind]}** {detail}" if isinstance(detail, str) and detail else f"**{labels[kind]}** 详见任务执行归档。"
 
 
 def publish_record(state: dict[str, Any], record: dict[str, Any], config_path: str | Path | None = None) -> bool:

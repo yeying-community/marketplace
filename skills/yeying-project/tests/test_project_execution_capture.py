@@ -10,6 +10,23 @@ import project_execution_capture as capture  # noqa: E402
 
 
 class ExecutionCaptureTest(unittest.TestCase):
+    def test_manifest_uses_explicit_session_when_events_have_multiple_candidates(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            events = root / "events.jsonl"
+            events.write_text('\n'.join(json.dumps({"session_id": s}) for s in ("one", "two")))
+            for name, options in (("ambiguous", []), ("explicit", ["--session-id", "primary"])):
+                output = root / name
+                capture.capture(capture.parser().parse_args([
+                    "--project-id", "8", "--task-id", "123", "--source-tool", "claude",
+                    "--state", str(root / (name + ".json")), "--output-dir", str(output),
+                    "--input-file", str(events), *options,
+                ]))
+                manifest = json.loads((output / "manifest.json").read_text())
+                transcript = json.loads((output / "transcript.json").read_text())
+                self.assertEqual(manifest.get("clientSessionId"), "primary" if options else None)
+                self.assertEqual([r["metadata"]["session_id"] for r in transcript["records"]], ["one", "two"])
+
     def test_capture_deduplicates_events_and_redacts(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -66,6 +83,7 @@ class ExecutionCaptureTest(unittest.TestCase):
                 json.dumps({
                     "event_id": "1",
                     "type": "session_start",
+                    "session_id": "native-123",
                     "metadata": {
                         "model": "event-model",
                         "model_provider": "provider-b",
@@ -83,6 +101,8 @@ class ExecutionCaptureTest(unittest.TestCase):
             ]))
             state = json.loads(state_path.read_text(encoding="utf-8"))
             self.assertEqual(state["model"], "explicit-model")
+            self.assertEqual(state["manifest"]["clientSessionId"], "native-123")
+            self.assertNotEqual(state["manifest"]["executionId"], "native-123")
             self.assertEqual(state["agent"]["client_version"], "2.0.0")
             self.assertEqual(
                 [(item["id"], item["role"]) for item in state["agent"]["models"]],

@@ -70,6 +70,7 @@ def new_state(args: argparse.Namespace, binding: dict[str, Any] | None = None) -
         "task_id": binding["task_id"],
         "binding_source": binding["source"],
         "execution_id": args.execution_id or str(uuid.uuid4()),
+        "client_session_id": redact(args.session_id),
         "source_tool": agent.get("source_tool") or args.source_tool,
         "model": primary_model(agent),
         "agent": agent,
@@ -83,6 +84,23 @@ def new_state(args: argparse.Namespace, binding: dict[str, Any] | None = None) -
         "output_dir": str(args.output_dir),
         "lifecycle_file": str(args.lifecycle_file) if args.lifecycle_file else None,
     }
+
+
+def resume_state(args: argparse.Namespace, binding: dict[str, Any] | None) -> dict[str, Any]:
+    state = load_state(args.state)
+    for key in ("project_id", "task_id", "execution_id"):
+        expected = (binding or {}).get(key) or getattr(args, key)
+        if expected is not None and str(expected) != str(state[key]):
+            raise ProjectApiError(f"{key} 与已有执行状态不一致，请选择对应的状态文件")
+    if args.session_id:
+        supplied = redact(args.session_id)
+        indexed = state.get("client_session_id") or (state.get("manifest") or {}).get("clientSessionId")
+        if indexed and indexed != supplied:
+            raise ProjectApiError("会话 ID 与已有执行状态不一致")
+        if state.get("finalized_at") and supplied != indexed:
+            raise ProjectApiError("已归档执行的会话 ID 不可更改")
+        state["client_session_id"] = supplied
+    return state
 
 
 def normalize_event(event: dict[str, Any]) -> tuple[str, dict[str, Any], str | None]:
@@ -102,8 +120,9 @@ def normalize_event(event: dict[str, Any]) -> tuple[str, dict[str, Any], str | N
 
 
 def capture(args: argparse.Namespace) -> dict[str, Any]:
+    binding = prepare_new_state(args) if args.state is None else None
     if args.state is not None and args.state.exists():
-        state = load_state(args.state)
+        state = resume_state(args, binding)
         args.output_dir = args.output_dir or Path(state["output_dir"])
         merge_state_agent_context(
             state,
@@ -111,7 +130,6 @@ def capture(args: argparse.Namespace) -> dict[str, Any]:
             locked=bool(state.get("finalized_at")),
         )
     else:
-        binding = prepare_new_state(args)
         state = new_state(args, binding)
     event_ids = set(state.get("event_ids", []))
     source = args.input_file.open(encoding="utf-8") if args.input_file else sys.stdin
@@ -158,6 +176,7 @@ def parser() -> argparse.ArgumentParser:
     command.add_argument("--binding-root", type=Path, help="任务绑定文件搜索起点，默认当前目录")
     add_agent_arguments(command, include_source_tool=True, source_tool_required=True)
     command.add_argument("--execution-id", default=None)
+    command.add_argument("--session-id", help="客户端提供的本地会话 ID")
     command.add_argument("--state", type=Path, help="默认写入绑定目录 .project/execution-<task-id>.json")
     command.add_argument("--output-dir", type=Path, help="默认写入绑定目录 .project/execution-<task-id>/")
     command.add_argument("--lifecycle-file", type=Path, help="研发生命周期 JSON 快照")
