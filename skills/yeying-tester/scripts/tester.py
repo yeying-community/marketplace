@@ -6,6 +6,7 @@ import json
 import os
 import re
 import sys
+from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -16,21 +17,41 @@ class RejectRedirects(HTTPRedirectHandler):
         return None
 
 
-def base_url():
-    url = urlsplit(os.environ.get("YEYING_TESTER_URL", "").strip())
+def connection_settings():
+    url = os.environ.get("YEYING_TESTER_URL", "").strip()
+    token = os.environ.get("YEYING_TESTER_TOKEN", "").strip()
+    if url and token:
+        return url, token
+
+    path = Path.home() / ".config/yeying/tester.json"
+    try:
+        settings = json.loads(path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        raise ValueError(f"Configure {path} or set both YEYING_TESTER_URL and YEYING_TESTER_TOKEN.") from None
+    except (UnicodeError, json.JSONDecodeError, OSError):
+        raise ValueError(f"Cannot read {path} as UTF-8 JSON.") from None
+    if not isinstance(settings, dict):
+        raise ValueError(f"Expected a JSON object in {path}.")
+    for field in ("url", "token"):
+        value = settings.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"Set '{field}' in {path}.")
+    return settings["url"].strip(), settings["token"].strip()
+
+
+def base_url(origin):
+    url = urlsplit(origin)
     loopback = url.hostname in ("localhost", "127.0.0.1", "::1")
     https = url.scheme == "https" or (url.scheme == "http" and loopback)
     if (not https or not url.hostname or url.username is not None or url.password is not None
             or url.path not in ("", "/") or url.query or url.fragment):
-        raise ValueError("Set YEYING_TESTER_URL to the Tester HTTPS origin (HTTP is supported for loopback).")
+        raise ValueError("Use the Tester HTTPS origin (HTTP is supported for loopback).")
     return f"{url.scheme}://{url.netloc}"
 
 
 def get(path, query=None):
-    token = os.environ.get("YEYING_TESTER_TOKEN", "").strip()
-    if not token:
-        raise ValueError("Set YEYING_TESTER_TOKEN from the Tester admin console.")
-    url = base_url() + "/api/v1/analysis/" + path
+    origin, token = connection_settings()
+    url = base_url(origin) + "/api/v1/analysis/" + path
     if query:
         url += "?" + urlencode(query)
     request = Request(url, headers={"Authorization": "Bearer " + token, "Accept": "application/json"})
