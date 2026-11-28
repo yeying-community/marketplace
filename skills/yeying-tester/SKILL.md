@@ -3,7 +3,7 @@ name: yeying-tester
 description: Analyze YeYing Tester quality, project E2E coverage and configuration, run failures, and test stability. Use when assessing release evidence, diagnosing an E2E batch, or designing and reviewing Tester end-to-end cases.
 ---
 
-Use the bundled `scripts/tester.py` with `YEYING_TESTER_URL` and `YEYING_TESTER_TOKEN` configured in the agent environment. A wallet-authenticated Tester administrator issues the expiring read-only token from **Skill 分析 Token**. Refer to [configuration](README_CN.md) when credentials or the server release need setup. Keep tokens out of analysis output.
+Use the bundled `scripts/tester.py` with the Tester origin and read-only token in `~/.config/yeying/tester.json`. A wallet-authenticated Tester administrator issues the expiring read-only token from **Skill 分析 Token**. Refer to [configuration](README_CN.md) when credentials or the server release need setup. Keep tokens out of analysis output.
 
 | Request | Command |
 | --- | --- |
